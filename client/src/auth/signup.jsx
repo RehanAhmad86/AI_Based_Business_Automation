@@ -1,25 +1,22 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"; 
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
-import { MdEmail } from "react-icons/md";
+import { MdEmail, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { useDispatch } from "react-redux";
 import { signInSuccess } from "../redux/userSlice";
-
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  // const [image, setImage] = useState("https://i.pravatar.cc/300");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   
-  const navigate = useNavigate(); // Use useNavigate hook for navigation
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  //const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
+ 
   const handleEmailSignup = async (e) => {
     e.preventDefault();
     try {
@@ -27,7 +24,7 @@ export default function SignUpPage() {
       const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }), // Add name and password here
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await res.json();
@@ -42,10 +39,9 @@ export default function SignUpPage() {
         return;
       }
 
-      // Assuming the response has user data to sign in
       localStorage.setItem("user", JSON.stringify(data.user));
       dispatch(signInSuccess(data.user));
-      navigate("/"); // Navigate to home after signup
+      navigate("/");
     } catch (error) {
       setError("An error occurred during signup");
     } finally {
@@ -54,453 +50,138 @@ export default function SignUpPage() {
   };
 
   return (
-      <form onSubmit={handleEmailSignup} className="w-80 space-y-4">
-        <h2 className="text-2xl font-bold text-center">Create Account</h2>
+    <div className="w-full max-w-md mx-auto">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+      </div>
 
-        {/* Social Icons */}
-        <div className="flex justify-center space-x-4">
-          <div
-            className="bg-gray-200 p-3 rounded-full cursor-pointer hover:bg-gray-300"
-            // onClick={handleGithubSignIn}
-          >
-            <FaGithub className="text-xl" />
-          </div>
-          <div
-            className="bg-gray-200 p-3 rounded-full cursor-pointer hover:bg-gray-300"
-            // onClick={handleGoogleSignIn}
-          >
+      {/* Social Login Options */}
+      <div className="mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <button className="group relative flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg hover:border-gray-400 hover:shadow-md transition-all duration-200 bg-white">
+            <FaGithub className="text-xl text-gray-700 group-hover:text-gray-900" />
+          </button>
+          <button className="group relative flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg hover:border-gray-400 hover:shadow-md transition-all duration-200 bg-white">
             <FcGoogle className="text-xl" />
-          </div>
-          <div
-            className="bg-gray-200 p-3 rounded-full cursor-pointer hover:bg-gray-300"
-            // onClick={handleEmailSignup}
-          >
-            <MdEmail className="text-xl text-red-500" />
-          </div>
+          </button>
+          <button className="group relative flex items-center justify-center py-3 px-4 border border-gray-300 rounded-lg hover:border-gray-400 hover:shadow-md transition-all duration-200 bg-white">
+            <MdEmail className="text-xl text-blue-600 group-hover:text-blue-700" />
+          </button>
         </div>
 
-        <div className="text-center text-sm text-gray-500">or</div>
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-white text-gray-500">Or continue with email</span>
+          </div>
+        </div>
+      </div>
 
+      {/* Form */}
+      <form onSubmit={handleEmailSignup} className="space-y-6">
         {/* Name Field */}
-        <div className="input-container">
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="input-field"
-            placeholder=" "
-            required
-          />
-          <label className="floating-label">Full Name</label>
+        <div className="space-y-2">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            Full Name
+          </label>
+          <div className="relative">
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white placeholder-gray-400"
+              placeholder="Enter your full name"
+              required
+            />
+          </div>
         </div>
 
         {/* Email Field */}
-        <div className="input-container">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="input-field"
-            placeholder=" "
-            required
-          />
-          <label className="floating-label">Email Address</label>
+        <div className="space-y-2">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email Address
+          </label>
+          <div className="relative">
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white placeholder-gray-400"
+              placeholder="Enter your email address"
+              required
+            />
+          </div>
         </div>
 
         {/* Password Field */}
-        <div className="input-container">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="input-field"
-            placeholder=" "
-            required
-          />
-          <label className="floating-label">Password</label>
+        <div className="space-y-2">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white placeholder-gray-400"
+              placeholder="Create a strong password"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? (
+                <MdVisibilityOff className="h-5 w-5" />
+              ) : (
+                <MdVisibility className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {/* Error Message */}
+        {error && (
+          <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
 
+        {/* Submit Button */}
         <button
           type="submit"
-          className="w-full bg-white text-green-600 p-2 rounded border"
           disabled={loading}
+          className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-3 px-4 rounded-lg font-medium hover:from-green-700 hover:to-green-800 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
         >
-          {loading ? "Signing up..." : "Sign Up"}
+          {loading ? (
+            <div className="flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+              Creating Account...
+            </div>
+          ) : (
+            "Create Account"
+          )}
         </button>
+
+        {/* Terms */}
+        <p className="text-xs text-gray-500 text-center">
+          By creating an account, you agree to our{" "}
+          <a href="#" className="text-green-600 hover:text-green-700 underline">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="#" className="text-green-600 hover:text-green-700 underline">
+            Privacy Policy
+          </a>
+        </p>
       </form>
+    </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import {
-//   GithubAuthProvider,
-//   GoogleAuthProvider,
-//   signInWithPopup,
-// } from "firebase/auth";
-// import { auth } from "../lib/firebase";
-
-
-
-
-
-
-
-// import { useState } from "react";
-// import { useHistory } from "react-router-dom"; // React Router for navigation
-// import AuthLayout from "../AuthLayout";
-// import { FcGoogle } from "react-icons/fc";
-// import { FaGithub } from "react-icons/fa";
-// import { MdEmail } from "react-icons/md";
-// import { useDispatch } from "react-redux";
-// // import { signInSuccess } from "../../redux/slices/userSlice";
-// import { signInSuccess } from "../redux/userSlice";
-
-// import {
-//   GithubAuthProvider,
-//   GoogleAuthProvider,
-//   signInWithPopup,
-// } from "firebase/auth";
-// import { auth } from "../../lib/firebase";
-
-// export default function SignUpPage() {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [name, setName] = useState("");
-//   const [image, setImage] = useState("https://i.pravatar.cc/300");
-//   const [error, setError] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const history = useHistory(); // Replacing Next.js's useRouter with useHistory
-//   const dispatch = useDispatch();
-
-//   const handleGoogleSignIn = async () => {
-//     try {
-//       const provider = new GoogleAuthProvider();
-//       provider.setCustomParameters({ prompt: "select_account" });
-//       const result = await signInWithPopup(auth, provider);
-//       const user = result.user;
-//       const res = await fetch("/api/auth/google", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({
-//           firebaseUid: user.uid,
-//           displayName: user.displayName,
-//           email: user.email,
-//           photoURL: user.photoURL,
-//         }),
-//       });
-
-//       if (!res.ok) {
-//         throw new Error("Failed to save user to database");
-//       }
-
-//       const data = await res.json();
-//       dispatch(signInSuccess(data.user));
-//       history.push("/dashboard");
-//     } catch (error) {
-//       console.error("Google Sign-In Error:", error);
-//       setError("Google Sign-In failed.");
-//     }
-//   };
-
-//   const handleGithubSignIn = async () => {
-//     try {
-//       const githubProvider = new GithubAuthProvider();
-//       githubProvider.addScope("user:email");
-//       const result = await signInWithPopup(auth, githubProvider);
-//       const credential = GithubAuthProvider.credentialFromResult(result);
-//       const user = result.user;
-
-//       if (!credential) {
-//         throw new Error("GitHub credential is missing.");
-//       }
-
-//       const idToken = await user.getIdToken();
-//       const userEmail = user.email || `github-${user.uid}@github.com`;
-//       const photoURL = user.photoURL;
-
-//       const res = await fetch("/api/auth/github", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           firebaseUid: user.uid,
-//           displayName: user.displayName,
-//           email: userEmail,
-//           photoURL: photoURL,
-//           idToken,
-//         }),
-//       });
-
-//       if (!res.ok) {
-//         throw new Error("Failed to save user to database");
-//       }
-
-//       const data = await res.json();
-//       dispatch(signInSuccess(data.user));
-//       history.push("/dashboard");
-//     } catch (error) {
-//       console.error("GitHub Sign-In Error:", error);
-//       setError("GitHub Sign-In failed.");
-//     }
-//   };
-
-//   const handleEmailSignup = async () => {
-//     try {
-//       setLoading(true);
-//       const res = await fetch("http://localhost:3000/api/auth/email/signup", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ name, email, password }), // Add name and password here
-//       });
-
-//       const data = await res.json();
-
-//       if (!res.ok) {
-//         setError(data?.error || "Email signup failed");
-//         return;
-//       }
-
-//       // Assuming the response has user data to sign in
-//       dispatch(signInSuccess(data.user));
-//       localStorage.setItem("user", JSON.stringify(data.user));
-//       history.push("/"); // Navigate to home after signup
-//     } catch (error) {
-//       setError("An error occurred during signup");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     const res = await fetch("/api/auth/signup", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({
-//         name,
-//         email,
-//         password,
-//         image,
-//       }),
-//     });
-
-//     const data = await res.json();
-
-//     if (!res.ok) {
-//       setError(data?.message || "Signup failed");
-//     } else {
-//       localStorage.setItem('user', JSON.stringify({ email, id: data.userId }));
-//       history.push("/dashboard");
-//     }
-
-//     setLoading(false);
-//   };
-
-//   return (
-//     <AuthLayout>
-//       <form onSubmit={handleEmailSignup} className="w-80 space-y-4">
-//         <h2 className="text-2xl font-bold text-center">Create Account</h2>
-
-//         {/* Social Icons */}
-//         <div className="flex justify-center space-x-4">
-//           <div
-//             className="bg-gray-200 p-3 rounded-full cursor-pointer hover:bg-gray-300"
-//             onClick={handleGithubSignIn}
-//           >
-//             <FaGithub className="text-xl" />
-//           </div>
-//           <div
-//             className="bg-gray-200 p-3 rounded-full cursor-pointer hover:bg-gray-300"
-//             onClick={handleGoogleSignIn}
-//           >
-//             <FcGoogle className="text-xl" />
-//           </div>
-//           <div
-//             className="bg-gray-200 p-3 rounded-full cursor-pointer hover:bg-gray-300"
-//             onClick={handleEmailSignup}
-//           >
-//             <MdEmail className="text-xl text-red-500" />
-//           </div>
-//         </div>
-
-//         <div className="text-center text-sm text-gray-500">or</div>
-
-//         {/* Name Field */}
-//         <div className="input-container">
-//           <input
-//             type="text"
-//             value={name}
-//             onChange={(e) => setName(e.target.value)}
-//             className="input-field"
-//             placeholder="&nbsp;"
-//             required
-//           />
-//           <label className="floating-label">Full Name</label>
-//         </div>
-
-//         {/* Email Field */}
-//         <div className="input-container">
-//           <input
-//             type="email"
-//             value={email}
-//             onChange={(e) => setEmail(e.target.value)}
-//             className="input-field"
-//             placeholder="&nbsp;"
-//             required
-//           />
-//           <label className="floating-label">Email Address</label>
-//         </div>
-
-//         {/* Password Field */}
-//         <div className="input-container">
-//           <input
-//             type="password"
-//             value={password}
-//             onChange={(e) => setPassword(e.target.value)}
-//             className="input-field"
-//             placeholder="&nbsp;"
-//             required
-//           />
-//           <label className="floating-label">Password</label>
-//         </div>
-
-//         {error && <p className="text-red-500 text-sm">{error}</p>}
-
-//         <button
-//           type="submit"
-//           className="w-full bg-white text-green-600 p-2 rounded border"
-//           disabled={loading}
-//         >
-//           {loading ? "Signing up..." : "Sign Up"}
-//         </button>
-//       </form>
-//     </AuthLayout>
-//   );
-// }
-
-
-// const handleSubmit = async (e) => {
-//   e.preventDefault();
-//   setLoading(true);
-
-//   const res = await fetch("/api/auth/signup", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       name,
-//       email,
-//       password,
-//       image,
-//     }),
-//   });
-
-//   const data = await res.json();
-
-//   if (!res.ok) {
-//     setError(data?.message || "Signup failed");
-//   } else {
-//     localStorage.setItem('user', JSON.stringify({ email, id: data.userId }));
-//     navigate("/dashboard"); // Use navigate instead of history.push
-//   }
-
-//   setLoading(false);
-// };
-
-
-
-
-// const handleGoogleSignIn = async () => {
-//   try {
-//     const provider = new GoogleAuthProvider();
-//     provider.setCustomParameters({ prompt: "select_account" });
-//     const result = await signInWithPopup(auth, provider);
-//     const user = result.user;
-//     const res = await fetch("/api/auth/google", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({
-//         firebaseUid: user.uid,
-//         displayName: user.displayName,
-//         email: user.email,
-//         photoURL: user.photoURL,
-//       }),
-//     });
-
-//     if (!res.ok) {
-//       throw new Error("Failed to save user to database");
-//     }
-
-//     const data = await res.json();
-//     dispatch(signInSuccess(data.user));
-//     navigate("/dashboard"); // Use navigate instead of history.push
-//   } catch (error) {
-//     console.error("Google Sign-In Error:", error);
-//     setError("Google Sign-In failed.");
-//   }
-// };
-
-// const handleGithubSignIn = async () => {
-//   try {
-//     const githubProvider = new GithubAuthProvider();
-//     githubProvider.addScope("user:email");
-//     const result = await signInWithPopup(auth, githubProvider);
-//     const credential = GithubAuthProvider.credentialFromResult(result);
-//     const user = result.user;
-
-//     if (!credential) {
-//       throw new Error("GitHub credential is missing.");
-//     }
-
-//     const idToken = await user.getIdToken();
-//     const userEmail = user.email || `github-${user.uid}@github.com`;
-//     const photoURL = user.photoURL;
-
-//     const res = await fetch("/api/auth/github", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         firebaseUid: user.uid,
-//         displayName: user.displayName,
-//         email: userEmail,
-//         photoURL: photoURL,
-//         idToken,
-//       }),
-//     });
-
-//     if (!res.ok) {
-//       throw new Error("Failed to save user to database");
-//     }
-
-//     const data = await res.json();
-//     dispatch(signInSuccess(data.user));
-//     navigate("/dashboard"); // Use navigate instead of history.push
-//   } catch (error) {
-//     console.error("GitHub Sign-In Error:", error);
-//     setError("GitHub Sign-In failed.");
-//   }
-// };

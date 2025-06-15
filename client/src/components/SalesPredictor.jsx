@@ -12,6 +12,8 @@ import {
   WifiIcon,
   CalendarIcon,
 } from "@heroicons/react/24/outline";
+import ReactMarkdown from "react-markdown";
+
 
 const SalesPredictor = () => {
   const [categories, setCategories] = useState([]);
@@ -35,18 +37,18 @@ const SalesPredictor = () => {
     day: "",
     marketingSpend: "",
     season: "summer",
-    brandPresence: 5, 
+    brandPresence: 5,
     location: {
       country: "",
       region: "",
       city: "",
       marketTier: 3,
-      incomeLevel: 3, 
-      inflationRate: 2.5, 
+      incomeLevel: 3,
+      inflationRate: 2.5,
       monthlyExpenses: 1500,
-      populationDensity: 2, 
+      populationDensity: 2,
       urbanizationLevel: "urban",
-      infrastructureScore: 7, 
+      infrastructureScore: 7,
       internetPenetration: 75,
       isFestivalOrHoliday: false,
     },
@@ -276,7 +278,7 @@ Focus on practical, data-driven strategies that consider the specific market con
 
     const fetchCountries = async () => {
       try {
-        console.log("Using API Key:", API_KEY); 
+        console.log("Using API Key:", API_KEY);
 
         const headers = new Headers();
         headers.append("X-CSCAPI-KEY", API_KEY);
@@ -505,7 +507,7 @@ Focus on practical, data-driven strategies that consider the specific market con
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 sm:p-6 md:p-8 flex">
       <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
-      
+
         <div className="w-full md:w-1/2 lg:w-1/3 bg-white rounded-2xl shadow-xl p-6 md:p-8 h-fit md:sticky md:top-8 transition-all duration-300">
           <div className="mb-8 flex items-center gap-3">
             <ChartBarIcon className="h-8 w-8 text-blue-600 transform transition-transform duration-500 hover:rotate-12" />
@@ -515,14 +517,14 @@ Focus on practical, data-driven strategies that consider the specific market con
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-           
+
             <div className="space-y-4">
               <h3 className="text-md font-medium text-gray-700 border-b pb-2">
                 Product Information
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-               
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
                     Category
@@ -1356,9 +1358,12 @@ Focus on practical, data-driven strategies that consider the specific market con
                         </div>
                       </div>
                     ) : aiInsights ? (
-                      <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-                        {aiInsights}
-                      </div>
+                      <p className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                        <ReactMarkdown>
+                          {aiInsights}
+                        </ReactMarkdown>
+                      </p>
+
                     ) : (
                       <div className="text-center py-8 text-gray-500">
                         Insights generation failed. Please try again.

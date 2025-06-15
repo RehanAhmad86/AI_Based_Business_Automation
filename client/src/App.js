@@ -12,15 +12,15 @@ import SignInPage from "./auth/signin";
 import SignUpPage from "./auth/signup";
 import DashboardPreview from "./components/DashboardPreview";
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import ChatBot from "./components/ChatBot";
 import SalesPredictor from "./components/SalesPredictor";
 import InvoiceScanner from "./pages/InvoiceScanner.jsx";
 import BarcodeScanner from "./components/BarcodeScanner.jsx";
-import BarcodeReader from "./pages/BarcodeReader.jsx";
 import ToneLetterAI from "./pages/ToneLetterAI.jsx";
+import PrivateRoute from "./auth/PrivateRoute";
+import FloatingChatBot from "./components/ChatBot.jsx";
 
-
-function Home() {
+export default function App() {
+  function Home() {
   return (
     <>
       <Hero />
@@ -31,10 +31,10 @@ function Home() {
       <Testimonials />
       <FAQ />
       <CTA />
+      <FloatingChatBot />
     </>
   );
 }
-export default function App() {
   return (
     <Router>
       <Routes>
@@ -43,16 +43,14 @@ export default function App() {
           <Route path="/auth/signup" element={<SignUpPage />} />
         </Route>
 
-        <Route path="/chatbot" element={<ChatBot />} />
-        <Route path="/sales-predict" element={<SalesPredictor />} />
-        <Route path="/invoice-scanner" element={<InvoiceScanner />} />
-        <Route path="/barcode-scanner" element={<BarcodeScanner />} />
-        <Route path="/barcode-reader" element={<BarcodeReader />} />
-        <Route path="/tone-email" element={<ToneLetterAI />} />
+        <Route path="/sales-predict" element={<PrivateRoute><SalesPredictor /></PrivateRoute>} />
+        <Route path="/invoice-scanner" element={<PrivateRoute><InvoiceScanner /></PrivateRoute>} />
+        <Route path="/barcode-scanner" element={<PrivateRoute><BarcodeScanner /></PrivateRoute>} />
+        <Route path="/tone-email" element={<PrivateRoute><ToneLetterAI /></PrivateRoute>} />
 
         <Route element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<DashboardPreview />} />
+          <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+          <Route path="/dashboard" element={<PrivateRoute><DashboardPreview /></PrivateRoute>} />
         </Route>
       </Routes>
     </Router>

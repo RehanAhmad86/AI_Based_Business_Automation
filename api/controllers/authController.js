@@ -2,9 +2,6 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
 export const registerUser = async (req, res) => {
   console.log("Request Body:", req.body);
   try {
@@ -96,3 +93,43 @@ export const loginUser = async (req, res) => {
       res.status(500).json({ error: "An error occurred during sign-in" });
     }
   };
+
+
+  export const deleteUserAccount = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    const deletedUser = await User.findOneAndDelete({ email: email });
+    
+    if (!deletedUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Account deleted successfully',
+      deletedUser: {
+        name: deletedUser.name,
+        email: deletedUser.email
+      }
+    });
+
+  } catch (error) {
+    console.error('Account deletion error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};

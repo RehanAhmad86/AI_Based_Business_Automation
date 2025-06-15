@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// export const openRouterRequest = async (messages, model = 'openchat/openchat-7b') => {
 export const openRouterRequest = async (messages, model = 'deepseek/deepseek-r1-0528-qwen3-8b:free') => {
   try {
     const response = await axios.post(
@@ -9,7 +8,7 @@ export const openRouterRequest = async (messages, model = 'deepseek/deepseek-r1-
         model,
         messages,
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 4000,
       },
       {
         headers: {

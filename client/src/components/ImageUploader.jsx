@@ -2,27 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './../styles/ImageUploader.css';
 
-// const parseData = (rawData) => {
-//   if (typeof rawData === 'string') {
-//     try {
-//       const cleaned = rawData
-//         .replace(/```json|```/g, '')  // remove markdown-style formatting
-//         .replace(/\\n/g, '')          // remove escaped newlines (optional)
-//         .trim();
-
-//       return JSON.parse(cleaned);
-//     } catch (e) {
-//       console.error("Failed to parse JSON:", e);
-//       return {};
-//     }
-//   }
-//   return rawData;
-// };
-
 const parseData = (rawData) => {
   if (typeof rawData === 'string') {
     try {
-      // Handle case where JSON is wrapped in text
       const jsonString = rawData.match(/\{.*\}/s)[0];
       return JSON.parse(jsonString);
     } catch (e) {
