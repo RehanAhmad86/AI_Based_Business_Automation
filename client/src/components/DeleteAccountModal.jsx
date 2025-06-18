@@ -164,7 +164,7 @@ const DeleteAccountModal = ({ isOpen, onClose, userEmail, onAccountDeleted }) =>
           <button
             onClick={handleDeleteAccount}
             disabled={isDeleting || confirmText !== 'DELETE'}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isDeleting ? 'Deleting...' : 'Delete Account'}
           </button>
