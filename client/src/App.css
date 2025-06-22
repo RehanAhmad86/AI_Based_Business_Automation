@@ -307,3 +307,18 @@ textarea {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+.insights-content {
+  line-height: 1.8;
+}
+
+.insights-content p {
+  margin-bottom: 1.2rem;
+}
+
+.insights-content ul, 
+.insights-content ol {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}

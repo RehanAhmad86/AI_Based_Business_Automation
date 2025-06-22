@@ -56,7 +56,7 @@ export async function chat(req, res) {
   try {
     const { messages } = req.body;
     
-    if (!Array.isArray(messages)) {
+    if (!messages || !Array.isArray(messages)) {
       return res.status(400).json({ error: 'Invalid messages format' });
     }
 
