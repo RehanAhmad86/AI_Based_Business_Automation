@@ -14,7 +14,6 @@ import {
 } from "@heroicons/react/24/outline";
 import ReactMarkdown from "react-markdown";
 
-
 const SalesPredictor = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -24,6 +23,7 @@ const SalesPredictor = () => {
   const [cities, setCities] = useState([]);
   const [filteredCities, setFilteredCities] = useState([]);
   const [showAdvancedLocation, setShowAdvancedLocation] = useState(false);
+  const token = localStorage.getItem("token");
 
   const API_KEY =
     process.env.NEXT_PUBLIC_LOCATION_API_KEY?.replace(/['"]/g, "") ||
@@ -139,7 +139,7 @@ const SalesPredictor = () => {
       7: "Strong (7/10) - Well-established brand",
       8: "Very Strong (8/10) - High brand loyalty",
       9: "Excellent (9/10) - Dominant brand presence",
-      10: "Market Leader (10/10) - Exceptional brand strength"
+      10: "Market Leader (10/10) - Exceptional brand strength",
     };
     return descriptions[score] || `${score}/10`;
   };
@@ -150,7 +150,7 @@ const SalesPredictor = () => {
       2: "Tier 2 - Developed Urban Center (Large metropolitan areas)",
       3: "Tier 3 - Emerging Urban Market (Growing cities)",
       4: "Tier 4 - Developing Market (Smaller cities, developing regions)",
-      5: "Tier 5 - Frontier Market (Rural or early-stage markets)"
+      5: "Tier 5 - Frontier Market (Rural or early-stage markets)",
     };
     return descriptions[tier] || `Tier ${tier}`;
   };
@@ -159,22 +159,28 @@ const SalesPredictor = () => {
     const descriptions = {
       1: "Low Income Level - Limited purchasing power",
       2: "Medium Income Level - Moderate purchasing power",
-      3: "High Income Level - Strong purchasing power"
+      3: "High Income Level - Strong purchasing power",
     };
     return descriptions[level] || `Income Level ${level}`;
   };
 
   const getInfrastructureDescription = (score) => {
-    if (score >= 8) return `Excellent Infrastructure (${score}/10) - Advanced logistics & connectivity`;
-    if (score >= 6) return `Good Infrastructure (${score}/10) - Reliable logistics & connectivity`;
-    if (score >= 4) return `Moderate Infrastructure (${score}/10) - Basic logistics & connectivity`;
+    if (score >= 8)
+      return `Excellent Infrastructure (${score}/10) - Advanced logistics & connectivity`;
+    if (score >= 6)
+      return `Good Infrastructure (${score}/10) - Reliable logistics & connectivity`;
+    if (score >= 4)
+      return `Moderate Infrastructure (${score}/10) - Basic logistics & connectivity`;
     return `Poor Infrastructure (${score}/10) - Limited logistics & connectivity`;
   };
 
   const getInternetPenetrationDescription = (percentage) => {
-    if (percentage >= 80) return `High Internet Access (${percentage}%) - Excellent digital reach`;
-    if (percentage >= 60) return `Moderate Internet Access (${percentage}%) - Good digital reach`;
-    if (percentage >= 40) return `Limited Internet Access (${percentage}%) - Moderate digital reach`;
+    if (percentage >= 80)
+      return `High Internet Access (${percentage}%) - Excellent digital reach`;
+    if (percentage >= 60)
+      return `Moderate Internet Access (${percentage}%) - Good digital reach`;
+    if (percentage >= 40)
+      return `Limited Internet Access (${percentage}%) - Moderate digital reach`;
     return `Low Internet Access (${percentage}%) - Limited digital reach`;
   };
 
@@ -182,16 +188,16 @@ const SalesPredictor = () => {
     const descriptions = {
       1: "Low Population Density - Sparse population, rural characteristics",
       2: "Medium Population Density - Moderate population, suburban characteristics",
-      3: "High Population Density - Dense population, urban characteristics"
+      3: "High Population Density - Dense population, urban characteristics",
     };
     return descriptions[density] || `Population Density Level ${density}`;
   };
 
   const getUrbanizationDescription = (level) => {
     const descriptions = {
-      "urban": "Urban Area - City environment with high commercial activity",
-      "suburban": "Suburban Area - Mixed residential/commercial environment",
-      "rural": "Rural Area - Countryside with limited commercial infrastructure"
+      urban: "Urban Area - City environment with high commercial activity",
+      suburban: "Suburban Area - Mixed residential/commercial environment",
+      rural: "Rural Area - Countryside with limited commercial infrastructure",
     };
     return descriptions[level] || level;
   };
@@ -206,32 +212,70 @@ const SalesPredictor = () => {
         if (formData.useLocation && formData.location.country) {
           locationInfo = `
 LOCATION & MARKET ANALYSIS:
-- Location: ${formData.location.city ? formData.location.city + ", " : ""}${formData.location.region ? formData.location.region + ", " : ""}${formData.location.country}
+- Location: ${formData.location.city ? formData.location.city + ", " : ""}${
+            formData.location.region ? formData.location.region + ", " : ""
+          }${formData.location.country}
 - ${getMarketTierDescription(formData.location.marketTier)}
 - ${getIncomeLevelDescription(formData.location.incomeLevel)}
-- Inflation Rate: ${formData.location.inflationRate}% (${formData.location.inflationRate > 5 ? 'High' : formData.location.inflationRate > 2 ? 'Moderate' : 'Low'} inflation environment)
-- Average Monthly Expenses: $${formData.location.monthlyExpenses} (Consumer spending capacity indicator)
+- Inflation Rate: ${formData.location.inflationRate}% (${
+            formData.location.inflationRate > 5
+              ? "High"
+              : formData.location.inflationRate > 2
+              ? "Moderate"
+              : "Low"
+          } inflation environment)
+- Average Monthly Expenses: $${
+            formData.location.monthlyExpenses
+          } (Consumer spending capacity indicator)
 - ${getUrbanizationDescription(formData.location.urbanizationLevel)}
 - ${getPopulationDensityDescription(formData.location.populationDensity)}
 - ${getInfrastructureDescription(formData.location.infrastructureScore)}
 - ${getInternetPenetrationDescription(formData.location.internetPenetration)}
-- Festival/Holiday Period: ${formData.location.isFestivalOrHoliday ? '🎉 YES - Special occasion period with increased spending' : 'NO - Regular shopping period'}`;
+- Festival/Holiday Period: ${
+            formData.location.isFestivalOrHoliday
+              ? "🎉 YES - Special occasion period with increased spending"
+              : "NO - Regular shopping period"
+          }`;
         }
 
-        const prompt = `Act as a top retail strategist. Analyze the following comprehensive sales data for ${prediction.product}:
+        const prompt = `Act as a top retail strategist. Analyze the following comprehensive sales data for ${
+          prediction.product
+        }:
 
 PRODUCT & BRAND ANALYSIS:
 - Product: ${prediction.product} (${formData.category} category)
 - Base Price: $${formData.basePrice}
 - ${getBrandPresenceDescription(formData.brandPresence)}
-- Season: ${formData.season.charAt(0).toUpperCase() + formData.season.slice(1)} (Day ${formData.day} of the month)
+- Season: ${
+          formData.season.charAt(0).toUpperCase() + formData.season.slice(1)
+        } (Day ${formData.day} of the month)
 - Marketing Budget: $${formData.marketingSpend}
 
 MARKET PERFORMANCE:
 - Predicted Sales Volume: ${prediction.prediction} units
 - Prediction Confidence: ${(prediction.confidence * 100).toFixed(1)}%
-${prediction.categoryPopularity ? `- Category Market Popularity: ${prediction.categoryPopularity}/10 (${prediction.categoryPopularity >= 7 ? 'High demand category' : prediction.categoryPopularity >= 5 ? 'Moderate demand category' : 'Low demand category'})` : ''}
-${prediction.competitionLevel ? `- Competition Intensity: ${prediction.competitionLevel}/10 (${prediction.competitionLevel >= 7 ? 'Highly competitive market' : prediction.competitionLevel >= 5 ? 'Moderately competitive market' : 'Low competition market'})` : ''}
+${
+  prediction.categoryPopularity
+    ? `- Category Market Popularity: ${prediction.categoryPopularity}/10 (${
+        prediction.categoryPopularity >= 7
+          ? "High demand category"
+          : prediction.categoryPopularity >= 5
+          ? "Moderate demand category"
+          : "Low demand category"
+      })`
+    : ""
+}
+${
+  prediction.competitionLevel
+    ? `- Competition Intensity: ${prediction.competitionLevel}/10 (${
+        prediction.competitionLevel >= 7
+          ? "Highly competitive market"
+          : prediction.competitionLevel >= 5
+          ? "Moderately competitive market"
+          : "Low competition market"
+      })`
+    : ""
+}
 ${locationInfo}
 
 Based on this comprehensive analysis, provide strategic insights covering:
@@ -441,40 +485,52 @@ Focus on practical, data-driven strategies that consider the specific market con
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('=== SALES PREDICTOR FORM DATA ===');
-    console.log('Product Information:');
-    console.log('- Category:', formData.category);
-    console.log('- Product ID:', formData.productId);
-    console.log('- Product Name:', formData.productName);
-    console.log('- Base Price:', formData.basePrice);
-    console.log('- Brand Presence:', formData.brandPresence);
+    console.log("=== SALES PREDICTOR FORM DATA ===");
+    console.log("Product Information:");
+    console.log("- Category:", formData.category);
+    console.log("- Product ID:", formData.productId);
+    console.log("- Product Name:", formData.productName);
+    console.log("- Base Price:", formData.basePrice);
+    console.log("- Brand Presence:", formData.brandPresence);
 
-    console.log('\nSales Parameters:');
-    console.log('- Day:', formData.day);
-    console.log('- Marketing Spend:', formData.marketingSpend);
-    console.log('- Season:', formData.season);
+    console.log("\nSales Parameters:");
+    console.log("- Day:", formData.day);
+    console.log("- Marketing Spend:", formData.marketingSpend);
+    console.log("- Season:", formData.season);
 
-    console.log('\nLocation Settings:');
-    console.log('- Use Location:', formData.useLocation);
+    console.log("\nLocation Settings:");
+    console.log("- Use Location:", formData.useLocation);
 
     if (formData.useLocation) {
-      console.log('- Country:', formData.location.country);
-      console.log('- Region:', formData.location.region);
-      console.log('- City:', formData.location.city);
-      console.log('- Market Tier:', formData.location.marketTier);
-      console.log('- Income Level:', formData.location.incomeLevel);
-      console.log('- Inflation Rate:', formData.location.inflationRate + '%');
-      console.log('- Monthly Expenses:', '$' + formData.location.monthlyExpenses);
-      console.log('- Population Density:', formData.location.populationDensity);
-      console.log('- Urbanization Level:', formData.location.urbanizationLevel);
-      console.log('- Infrastructure Score:', formData.location.infrastructureScore + '/10');
-      console.log('- Internet Penetration:', formData.location.internetPenetration + '%');
-      console.log('- Festival/Holiday Period:', formData.location.isFestivalOrHoliday);
+      console.log("- Country:", formData.location.country);
+      console.log("- Region:", formData.location.region);
+      console.log("- City:", formData.location.city);
+      console.log("- Market Tier:", formData.location.marketTier);
+      console.log("- Income Level:", formData.location.incomeLevel);
+      console.log("- Inflation Rate:", formData.location.inflationRate + "%");
+      console.log(
+        "- Monthly Expenses:",
+        "$" + formData.location.monthlyExpenses
+      );
+      console.log("- Population Density:", formData.location.populationDensity);
+      console.log("- Urbanization Level:", formData.location.urbanizationLevel);
+      console.log(
+        "- Infrastructure Score:",
+        formData.location.infrastructureScore + "/10"
+      );
+      console.log(
+        "- Internet Penetration:",
+        formData.location.internetPenetration + "%"
+      );
+      console.log(
+        "- Festival/Holiday Period:",
+        formData.location.isFestivalOrHoliday
+      );
     }
 
-    console.log('\nComplete Form Data Object:');
+    console.log("\nComplete Form Data Object:");
     console.log(JSON.stringify(formData, null, 2));
-    console.log('=====================================');
+    console.log("=====================================");
 
     setLoading(true);
     setPrediction(null);
@@ -485,9 +541,16 @@ Focus on practical, data-driven strategies that consider the specific market con
         location: formData.useLocation ? formData.location : undefined,
       };
 
+      console.log("=== FRONTEND DATA SENT ===");
+      console.log("Request URL:", "/api/predict-sales");
+      console.log("Request Body:", JSON.stringify(requestBody, null, 2));
+
       const response = await fetch("/api/predict-sales", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+         },
         body: JSON.stringify(requestBody),
       });
 
@@ -507,7 +570,6 @@ Focus on practical, data-driven strategies that consider the specific market con
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 sm:p-6 md:p-8 flex">
       <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
-
         <div className="w-full md:w-1/2 lg:w-1/3 bg-white rounded-2xl shadow-xl p-6 md:p-8 h-fit md:sticky md:top-8 transition-all duration-300">
           <div className="mb-8 flex items-center gap-3">
             <ChartBarIcon className="h-8 w-8 text-blue-600 transform transition-transform duration-500 hover:rotate-12" />
@@ -517,14 +579,12 @@ Focus on practical, data-driven strategies that consider the specific market con
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-
             <div className="space-y-4">
               <h3 className="text-md font-medium text-gray-700 border-b pb-2">
                 Product Information
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
                     Category
@@ -880,8 +940,9 @@ Focus on practical, data-driven strategies that consider the specific market con
                       {showAdvancedLocation ? "Hide" : "Show"} Advanced Location
                       Parameters
                       <svg
-                        className={`w-4 h-4 ml-1 transition-transform ${showAdvancedLocation ? "rotate-180" : ""
-                          }`}
+                        className={`w-4 h-4 ml-1 transition-transform ${
+                          showAdvancedLocation ? "rotate-180" : ""
+                        }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -1359,11 +1420,8 @@ Focus on practical, data-driven strategies that consider the specific market con
                       </div>
                     ) : aiInsights ? (
                       <p className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-                        <ReactMarkdown>
-                          {aiInsights}
-                        </ReactMarkdown>
+                        <ReactMarkdown>{aiInsights}</ReactMarkdown>
                       </p>
-
                     ) : (
                       <div className="text-center py-8 text-gray-500">
                         Insights generation failed. Please try again.

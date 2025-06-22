@@ -8,12 +8,12 @@ import salesRoutes from "./routes/salesRoute.js";
 import productRoutes from "./routes/productRoutes.js";
 import imageRoutes from "./routes/imageProcessing.js"
 import emailGeneratorRoutes from "./routes/emailGenerator.routes.js";
+import predictionRoutes from "./routes/predictionRoutes.js";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.json());
@@ -24,13 +24,13 @@ aiRouter.use(cors({
   credentials: true
 }));
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api', salesRoutes);
 app.use('/api', productRoutes);
 app.use('/api/image', imageRoutes);
 app.use('/api/email', emailGeneratorRoutes);
+app.use("/api/predictions", predictionRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend server is working!");

@@ -19,6 +19,7 @@ module.exports = {
     './src/pages/InvoiceScanner.jsx',
     './src/pages/QualityChecker.jsx',
     './src/pages/ToneLetterAI.jsx',
+    './src/pages/sales-analytics.jsx',
     './src/auth/AuthLayout.jsx',
     './src/auth/SignIn.jsx',
     './src/auth/SignUp.jsx',

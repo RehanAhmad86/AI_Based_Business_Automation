@@ -18,6 +18,7 @@ import BarcodeScanner from "./components/BarcodeScanner.jsx";
 import ToneLetterAI from "./pages/ToneLetterAI.jsx";
 import PrivateRoute from "./auth/PrivateRoute";
 import FloatingChatBot from "./components/ChatBot.jsx";
+import { SalesAnalyticsDashboard } from "./pages/sales-analytics.jsx";
 
 export default function App() {
   function Home() {
@@ -47,10 +48,11 @@ export default function App() {
         <Route path="/invoice-scanner" element={<PrivateRoute><InvoiceScanner /></PrivateRoute>} />
         <Route path="/barcode-scanner" element={<PrivateRoute><BarcodeScanner /></PrivateRoute>} />
         <Route path="/tone-email" element={<PrivateRoute><ToneLetterAI /></PrivateRoute>} />
-
+        <Route path="/tone-email" element={<PrivateRoute><ToneLetterAI /></PrivateRoute>} />
+        
         <Route element={<MainLayout />}>
           <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
-          <Route path="/dashboard" element={<PrivateRoute><DashboardPreview /></PrivateRoute>} />
+          <Route path="/sales-analytics" element={<PrivateRoute><SalesAnalyticsDashboard /></PrivateRoute>} />
         </Route>
       </Routes>
     </Router>
