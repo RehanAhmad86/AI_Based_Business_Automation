@@ -48,8 +48,7 @@ export default function App() {
         <Route path="/invoice-scanner" element={<PrivateRoute><InvoiceScanner /></PrivateRoute>} />
         <Route path="/barcode-scanner" element={<PrivateRoute><BarcodeScanner /></PrivateRoute>} />
         <Route path="/tone-email" element={<PrivateRoute><ToneLetterAI /></PrivateRoute>} />
-        <Route path="/tone-email" element={<PrivateRoute><ToneLetterAI /></PrivateRoute>} />
-        
+
         <Route element={<MainLayout />}>
           <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
           <Route path="/sales-analytics" element={<PrivateRoute><SalesAnalyticsDashboard /></PrivateRoute>} />

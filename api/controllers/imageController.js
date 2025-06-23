@@ -1,42 +1,3 @@
-// import { openRouterImageRequest } from '../config/openRouter.js';
-// import axios from 'axios';
-
-// const analysisPrompts = {
-//   invoice: "Analyze this invoice image and extract: vendor name, total amount, date, items purchased in JSON format",
-//   // barcode: "Read this barcode/qr code and return the raw data and type",
-//  barcode:`Read this barcode/qr code and return JSON format: { "raw_data": string, "type": "QR_CODE|BARCODE" }`,
-//   quality: "Inspect this product image for defects and quality issues. List findings with confidence scores"
-// };
-
-// export const imageAnalysis = (type) => async (req, res) => {
-//   try {
-//     console.log('Uploaded File:', req.file);
-//     if (!req.file) {
-//       return res.status(400).json({ success: false, error: 'No file uploaded' });
-//     }
-//     const image = req.file.buffer.toString('base64');
-//     const prompt = analysisPrompts[type];
-//     console.log('Uploaded File:', req.file);
-    
-//     // For OpenRouter implementation
-//     const result = await openRouterImageRequest(image, prompt);
-    
-//     // Alternative direct API implementation example
-//     // const result = await axios.post('https://api.openrouter.ai/v1/vision', {
-//     //   image,
-//     //   prompt,
-//     //   model: 'google/palm-vision'
-//     // });
-
-//     res.json({ success: true, data: result });
-//   } catch (error) {
-//     console.error(`${type} analysis error:`, error);
-//     res.status(500).json({
-//       success: false,
-//       error: error.response?.data?.error || error.message
-//     });
-//   }
-// };
 import { openRouterImageRequest } from '../config/openRouter.js';
 import axios from 'axios';
 
@@ -97,15 +58,12 @@ export const imageAnalysis = (type) => async (req, res) => {
     const image = req.file.buffer.toString('base64');
     const prompt = analysisPrompts[type];
 
-    // Get raw API response
     const apiResponse = await openRouterImageRequest(image, prompt);
     
-    // Process response
     const parsedData = typeof apiResponse === 'string' 
       ? extractJSON(apiResponse)
       : apiResponse;
 
-    // Handle nested errors
     if (parsedData.error) {
       throw new Error(parsedData.error);
     }
