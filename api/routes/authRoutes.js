@@ -1,20 +1,13 @@
-// import express from "express";
-// import { registerUser } from "../controllers/authController.js";
+import express from "express"
+import { registerUser, loginUser, oauthUser, deleteUserAccount } from "../controllers/authController.js"
 
-// const router = express.Router();
+const router = express.Router()
 
-// router.post("/register", registerUser);
+router.post("/register", registerUser)
+router.post("/login", loginUser)
 
-// export default router;
+router.post("/oauth", oauthUser)
 
-import express from "express";
-import { registerUser, loginUser } from "../controllers/authController.js";
-import { deleteUserAccount } from "../controllers/authController.js";
+router.delete("/delete", deleteUserAccount)
 
-const router = express.Router();
-
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.delete('/delete-account', deleteUserAccount);
-
-export default router;
+export default router

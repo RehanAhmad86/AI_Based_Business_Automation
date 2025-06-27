@@ -11,6 +11,8 @@ node_modules/
 /api/node_modules
 # Client node_modules
 /client/node_modules
+api/config/serviceAccountKey.json
+client/src/lib/serviceAccountKey.json
 
 
 # testing

@@ -1,16 +1,61 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, default: "admin" },
-    image: { type: String, default: "" },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: function () {
+        return !this.firebaseUid
+      },
+    },
+    firebaseUid: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    image: {
+      type: String,
+      default: "dp.jpg",
+    },
+    role: {
+      type: String,
+      enum: ["admin", "user"],
+      default: "admin",
+    },
+    provider: {
+      type: String,
+      enum: ["email", "google", "github"],
+      default: "email",
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    lastLogin: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  { timestamps: true }
-);
+  {
+    timestamps: true,
+  },
+)
 
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+userSchema.index({ email: 1 })
+userSchema.index({ firebaseUid: 1 })
 
-export default User;
+const User = mongoose.model("User", userSchema)
+
+export default User

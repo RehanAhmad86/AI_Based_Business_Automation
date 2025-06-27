@@ -9,6 +9,7 @@ import productRoutes from "./routes/productRoutes.js";
 import imageRoutes from "./routes/imageProcessing.js"
 import emailGeneratorRoutes from "./routes/emailGenerator.routes.js";
 import predictionRoutes from "./routes/predictionRoutes.js";
+import githubAuthRoutes from "./routes/githubAuthRoutes.js"
 
 dotenv.config();
 const app = express();
@@ -25,6 +26,7 @@ aiRouter.use(cors({
 }));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", githubAuthRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api', salesRoutes);
 app.use('/api', productRoutes);
