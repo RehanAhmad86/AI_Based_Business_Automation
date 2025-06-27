@@ -29,9 +29,7 @@ export default function SignUpPage() {
     setError("")
 
     try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
-const res = await fetch(`${API_URL}/api/auth/register`, {
-     // const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
@@ -99,9 +97,7 @@ const res = await fetch(`${API_URL}/api/auth/register`, {
       console.log("Sending Google user data to backend:", userData)
 
       // Send user data to your backend
-      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
-const res = await fetch(`${API_URL}/api/auth/oauth`, {
-     // const res = await fetch("http://localhost:5000/api/auth/oauth", {
+     const res = await fetch("http://localhost:5000/api/auth/oauth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
@@ -156,9 +152,8 @@ const res = await fetch(`${API_URL}/api/auth/oauth`, {
         email: userEmail,
         photoURL: photoURL,
       })
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
-const res = await fetch(`${API_URL}/api/auth/github`, {
-      // const res = await fetch("http://localhost:5000/api/auth/github", {
+
+      const res = await fetch("http://localhost:5000/api/auth/github", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
