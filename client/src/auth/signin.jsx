@@ -1,74 +1,79 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { useDispatch } from "react-redux"
-import { signInSuccess } from "../redux/userSlice"
-import { FaGithub, FaGoogle } from "react-icons/fa"
-import { MdVisibility, MdVisibilityOff } from "react-icons/md"
-import { signInWithPopup, GithubAuthProvider } from "firebase/auth"
-import { auth, googleProvider, githubProvider } from "../../src/lib/firebase"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { signInSuccess } from "../redux/userSlice";
+import { FaGithub, FaGoogle } from "react-icons/fa";
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { signInWithPopup, GithubAuthProvider } from "firebase/auth";
+import { auth, googleProvider, githubProvider } from "../../src/lib/firebase";
 
 export default function SignInPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [oauthLoading, setOauthLoading] = useState({ google: false, github: false })
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState({
+    google: false,
+    github: false,
+  });
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+     const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
+const res = await fetch(`${API_URL}/api/auth/login`, {
+        // const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-      })
+      });
 
       if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.error || "Sign-in failed")
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Sign-in failed");
       }
 
-      const data = await res.json()
-      localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
-      dispatch(signInSuccess(data.user))
-      navigate("/")
+      const data = await res.json();
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      dispatch(signInSuccess(data.user));
+      navigate("/");
     } catch (error) {
-      setError(error.message)
+      setError(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleGoogleSignIn = async () => {
-    setOauthLoading((prev) => ({ ...prev, google: true }))
-    setError("")
+    setOauthLoading((prev) => ({ ...prev, google: true }));
+    setError("");
 
     try {
-      const result = await signInWithPopup(auth, googleProvider)
-      const user = result.user
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
 
-      console.log("Firebase user object:", user)
+      console.log("Firebase user object:", user);
 
-      let userEmail = user.email
+      let userEmail = user.email;
       if (!userEmail && user.providerData && user.providerData.length > 0) {
-        userEmail = user.providerData[0].email
+        userEmail = user.providerData[0].email;
       }
 
-      let displayName = user.displayName
+      let displayName = user.displayName;
       if (!displayName) {
         if (userEmail && userEmail.includes("@")) {
-          displayName = userEmail.split("@")[0]
+          displayName = userEmail.split("@")[0];
         } else {
-          displayName = `User_${user.uid.substring(0, 8)}`
+          displayName = `User_${user.uid.substring(0, 8)}`;
         }
       }
 
@@ -79,67 +84,74 @@ export default function SignInPage() {
         image: user.photoURL || null,
         provider: "google",
         emailVerified: user.emailVerified,
-      }
+      };
 
-      console.log("Sending Google user data to backend:", userData)
+      console.log("Sending Google user data to backend:", userData);
 
       // Send user data to your backend
-      const res = await fetch("http://localhost:5000/api/auth/oauth", {
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
+const res = await fetch(`${API_URL}/api/auth/oauth`, {
+      // const res = await fetch("http://localhost:5000/api/auth/oauth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
-      })
+      });
 
-      const responseData = await res.json()
-      console.log("Backend response:", responseData)
+      const responseData = await res.json();
+      console.log("Backend response:", responseData);
 
       if (!res.ok) {
-        throw new Error(responseData.error || "Google sign-in failed")
+        throw new Error(responseData.error || "Google sign-in failed");
       }
 
-      localStorage.setItem("token", responseData.token)
-      localStorage.setItem("user", JSON.stringify(responseData.user))
-      dispatch(signInSuccess(responseData.user))
-      navigate("/")
+      localStorage.setItem("token", responseData.token);
+      localStorage.setItem("user", JSON.stringify(responseData.user));
+      dispatch(signInSuccess(responseData.user));
+      navigate("/");
     } catch (error) {
-      console.error("Google sign-in error:", error)
+      console.error("Google sign-in error:", error);
       if (error.code === "auth/popup-closed-by-user") {
-        setError("Sign-in was cancelled")
-      } else if (error.code === "auth/account-exists-with-different-credential") {
-        setError("An account already exists with the same email address but different sign-in credentials")
+        setError("Sign-in was cancelled");
+      } else if (
+        error.code === "auth/account-exists-with-different-credential"
+      ) {
+        setError(
+          "An account already exists with the same email address but different sign-in credentials"
+        );
       } else {
-        setError(error.message || "Failed to sign in with Google")
+        setError(error.message || "Failed to sign in with Google");
       }
     } finally {
-      setOauthLoading((prev) => ({ ...prev, google: false }))
+      setOauthLoading((prev) => ({ ...prev, google: false }));
     }
-  }
+  };
 
   const handleGithubSignIn = async () => {
-    setOauthLoading((prev) => ({ ...prev, github: true }))
-    setError("")
+    setOauthLoading((prev) => ({ ...prev, github: true }));
+    setError("");
 
     try {
-      const result = await signInWithPopup(auth, githubProvider)
-      const credential = GithubAuthProvider.credentialFromResult(result)
-      const user = result.user
+      const result = await signInWithPopup(auth, githubProvider);
+      const credential = GithubAuthProvider.credentialFromResult(result);
+      const user = result.user;
 
       if (!credential) {
-        throw new Error("GitHub credential is missing.")
+        throw new Error("GitHub credential is missing.");
       }
 
-      const idToken = await user.getIdToken()
-      const userEmail = user.email || `github-${user.uid}@github.com`
-      const photoURL = user.photoURL
+      const idToken = await user.getIdToken();
+      const userEmail = user.email || `github-${user.uid}@github.com`;
+      const photoURL = user.photoURL;
 
       console.log("GitHub user data:", {
         firebaseUid: user.uid,
         displayName: user.displayName,
         email: userEmail,
         photoURL: photoURL,
-      })
-
-      const res = await fetch("http://localhost:5000/api/auth/github", {
+      });
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
+const res = await fetch(`${API_URL}/api/auth/github`, {
+     // const res = await fetch("http://localhost:5000/api/auth/github", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -151,34 +163,38 @@ export default function SignInPage() {
           photoURL: photoURL,
           idToken,
         }),
-      })
+      });
 
       if (!res.ok) {
-        const errorData = await res.json()
-        throw new Error(errorData.error || "Failed to save user to database")
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to save user to database");
       }
 
-      const data = await res.json()
-      console.log("GitHub Backend response:", data)
+      const data = await res.json();
+      console.log("GitHub Backend response:", data);
 
-      const token = data.token || "github-auth-token" 
-      localStorage.setItem("token", token)
-      localStorage.setItem("user", JSON.stringify(data.user))
-      dispatch(signInSuccess(data.user))
-      navigate("/")
+      const token = data.token || "github-auth-token";
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      dispatch(signInSuccess(data.user));
+      navigate("/");
     } catch (error) {
-      console.error("GitHub sign-in error:", error)
+      console.error("GitHub sign-in error:", error);
       if (error.code === "auth/popup-closed-by-user") {
-        setError("Sign-in was cancelled")
-      } else if (error.code === "auth/account-exists-with-different-credential") {
-        setError("An account already exists with the same email address but different sign-in credentials")
+        setError("Sign-in was cancelled");
+      } else if (
+        error.code === "auth/account-exists-with-different-credential"
+      ) {
+        setError(
+          "An account already exists with the same email address but different sign-in credentials"
+        );
       } else {
-        setError(error.message || "Failed to sign in with GitHub")
+        setError(error.message || "Failed to sign in with GitHub");
       }
     } finally {
-      setOauthLoading((prev) => ({ ...prev, github: false }))
+      setOauthLoading((prev) => ({ ...prev, github: false }));
     }
-  }
+  };
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -226,7 +242,9 @@ export default function SignInPage() {
             <div className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-white text-gray-500">Or sign in with email</span>
+            <span className="px-4 bg-white text-gray-500">
+              Or sign in with email
+            </span>
           </div>
         </div>
       </div>
@@ -235,7 +253,10 @@ export default function SignInPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Email Field */}
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
             Email Address
           </label>
           <div className="relative">
@@ -254,7 +275,10 @@ export default function SignInPage() {
         {/* Password Field */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
           </div>
@@ -273,7 +297,11 @@ export default function SignInPage() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
             >
-              {showPassword ? <MdVisibilityOff className="h-5 w-5" /> : <MdVisibility className="h-5 w-5" />}
+              {showPassword ? (
+                <MdVisibilityOff className="h-5 w-5" />
+              ) : (
+                <MdVisibility className="h-5 w-5" />
+              )}
             </button>
           </div>
         </div>
@@ -303,9 +331,11 @@ export default function SignInPage() {
 
         {/* Security Notice */}
         <div className="text-center">
-          <p className="text-xs text-gray-500">Protected by advanced security measures</p>
+          <p className="text-xs text-gray-500">
+            Protected by advanced security measures
+          </p>
         </div>
       </form>
     </div>
-  )
+  );
 }

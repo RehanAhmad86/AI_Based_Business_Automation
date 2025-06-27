@@ -38,7 +38,9 @@ const EmailGenerator = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post(' http://localhost:5000/api/email/generate-email', 
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000"
+      const response = await axios.post(`${API_URL}/api/email/generate-email`, 
+   // const response = await axios.post(' http://localhost:5000/api/email/generate-email', 
         { prompt, tone },
         {
           headers: {

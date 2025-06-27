@@ -27,11 +27,11 @@ if (!admin.apps.length) {
     // Ye dummy ha
     admin.initializeApp({
       credential: admin.credential.cert({
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "ai-based-business-automation",
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "business-automation-a8afe",
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
       }),
-      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "ai-based-business-automation",
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "business-automation-a8afe",
     })
   }
 }
