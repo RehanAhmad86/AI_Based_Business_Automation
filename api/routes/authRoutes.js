@@ -8,6 +8,6 @@ router.post("/login", loginUser)
 
 router.post("/oauth", oauthUser)
 
-router.delete("/delete", deleteUserAccount)
+router.delete("/delete-account", deleteUserAccount)
 
 export default router

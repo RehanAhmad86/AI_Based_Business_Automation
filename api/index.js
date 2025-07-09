@@ -10,6 +10,8 @@ import imageRoutes from "./routes/imageProcessing.js"
 import emailGeneratorRoutes from "./routes/emailGenerator.routes.js";
 import predictionRoutes from "./routes/predictionRoutes.js";
 import githubAuthRoutes from "./routes/githubAuthRoutes.js"
+import inventoryRoutes from "./routes/inventoryRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -41,6 +43,8 @@ app.use('/api', productRoutes);
 app.use('/api/image', imageRoutes);
 app.use('/api/email', emailGeneratorRoutes);
 app.use("/api/predictions", predictionRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend server is working!");
