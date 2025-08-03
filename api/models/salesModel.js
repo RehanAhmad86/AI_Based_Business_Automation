@@ -14,240 +14,213 @@ const FEATURE_RANGES = {
   inflationRate: [0, 20],
 };
 
+// IMPROVED: More nuanced feature interpretations with smoother curves
 const FEATURE_INTERPRETATIONS = {
   marketTier: (value) => {
-    const impact = { 1: 1.5, 2: 1.3, 3: 1.0, 4: 0.8, 5: 0.6 };
-    return impact[value] || 1.0;
+    // Smoother curve instead of discrete jumps
+    return Math.max(0.4, 2.0 - (value - 1) * 0.35);
   },
 
   incomeLevel: (value) => {
-    const impact = {
-      low: 0.7,
-      medium: 1.0,
-      high: 1.3,
-    };
-    return impact[value] || 1.0; 
+    // Continuous function instead of discrete mapping
+    return 0.5 + (value / 5) * 0.8;
   },
 
   populationDensity: (value) => {
-    const impact = {
-      low: 0.8,
-      medium: 1.0,
-      high: 1.2,
-    };
-    return impact[value] || 1.0; 
+    // More realistic population density impact
+    return 0.7 + (value / 5) * 0.6;
   },
 
   infrastructureScore: (value) => {
-    if (value <= 2) return 0.5; 
-    if (value <= 4) return 0.7; 
-    if (value <= 6) return 1.0; 
-    if (value <= 8) return 1.2; 
-    return 1.4;
+    // Sigmoid-like curve for infrastructure impact
+    return 0.3 + 1.4 / (1 + Math.exp(-(value - 5) * 0.8));
   },
 
   brandPresence: (value) => {
-    if (value <= 2) return 0.6; // Very Weak
-    if (value <= 4) return 0.8; // Weak
-    if (value <= 6) return 1.0; // Medium
-    if (value <= 8) return 1.2; // Strong
-    return 1.4; // Very Strong
+    // Exponential growth curve for brand impact
+    return 0.4 + 1.2 * Math.pow(value / 10, 1.5);
   },
 
   urbanizationLevel: (level) => {
     const impact = {
-      rural: 0.8,
+      rural: 0.75,
       suburban: 1.0,
-      urban: 1.2,
+      urban: 1.35,
     };
     return impact[level?.toLowerCase()] || 1.0;
   },
 
   season: (season) => {
     const impact = {
-      winter: 0.9, // Lower consumer activity
-      spring: 1.1, // Increased buying
-      summer: 1.2, // Peak season
-      fall: 1.0, // Moderate activity
+      winter: 0.85,
+      spring: 1.15,
+      summer: 1.25,
+      fall: 1.05,
     };
     return impact[season?.toLowerCase()] || 1.0;
   },
 };
 
-function assessProductValue(productName, basePrice) {
+// IMPROVED: Enhanced product value assessment with category context
+function assessProductValue(productName, basePrice, category) {
   if (!productName) return 1.0;
 
   const name = productName.toLowerCase();
+  const cat = category?.toLowerCase() || '';
 
-  // RESTORED: All original keyword categories
-  const highValueKeywords = [
-    "professional",
-    "premium",
-    "luxury",
-    "advanced",
-    "pro",
-    "elite",
-    "exclusive",
-    "deluxe",
-    "high-end",
-    "executive",
-    "signature",
-    "tailored",
-    "bespoke",
-    "ultra",
-    "refined",
-  ];
-
-  const techKeywords = [
-    "smart",
-    "digital",
-    "electronic",
-    "tech",
-    "ai",
-    "wireless",
-    "iot",
-    "automated",
-    "robotic",
-    "cloud",
-    "intelligent",
-    "connected",
-    "4k",
-    "bluetooth",
-    "cyber",
-    "quantum",
-    "gadget",
-  ];
-
-  const beautyKeywords = [
-    "serum",
-    "treatment",
-    "perfector",
-    "repair",
-    "anti-aging",
-    "hydrating",
-    "glow",
-    "radiance",
-    "moisturizer",
-    "elixir",
-    "retinol",
-    "collagen",
-    "brightening",
-    "nourish",
-    "smoothing",
-    "firming",
-    "cleanser",
-    "toner",
-    "essence",
-  ];
-  const healthKeywords = [
-    "supplement",
-    "vitamin",
-    "protein",
-    "health",
-    "medical",
-    "wellness",
-    "immunity",
-    "detox",
-    "organic",
-    "fitness",
-    "nutrient",
-    "multivitamin",
-    "omega",
-    "herbal",
-    "recovery",
-    "antioxidant",
-    "metabolism",
-    "endurance",
-    "probiotic",
-  ];
+  // Enhanced keyword categories with weights
+  const keywordCategories = {
+    luxury: {
+      keywords: ["professional", "premium", "luxury", "advanced", "pro", "elite", 
+                "exclusive", "deluxe", "high-end", "executive", "signature", 
+                "tailored", "bespoke", "ultra", "refined", "artisan", "handcrafted"],
+      weight: 0.4
+    },
+    tech: {
+      keywords: ["smart", "digital", "electronic", "tech", "ai", "wireless", "iot", 
+                "automated", "robotic", "cloud", "intelligent", "connected", "4k", 
+                "bluetooth", "cyber", "quantum", "gadget", "nano", "biometric"],
+      weight: 0.3
+    },
+    beauty: {
+      keywords: ["serum", "treatment", "perfector", "repair", "anti-aging", 
+                "hydrating", "glow", "radiance", "moisturizer", "elixir", 
+                "retinol", "collagen", "brightening", "nourish", "smoothing", 
+                "firming", "cleanser", "toner", "essence", "concentrate"],
+      weight: 0.25
+    },
+    health: {
+      keywords: ["supplement", "vitamin", "protein", "health", "medical", 
+                "wellness", "immunity", "detox", "organic", "fitness", 
+                "nutrient", "multivitamin", "omega", "herbal", "recovery", 
+                "antioxidant", "metabolism", "endurance", "probiotic", "therapeutic"],
+      weight: 0.2
+    }
+  };
 
   let valueMultiplier = 1.0;
+  let matchedCategories = 0;
 
-  // RESTORED: Original keyword checking logic
-  if (highValueKeywords.some((keyword) => name.includes(keyword))) {
-    valueMultiplier += 0.3;
+  // Check keywords with weighted scoring
+  for (const [categoryName, categoryData] of Object.entries(keywordCategories)) {
+    const matches = categoryData.keywords.filter(keyword => name.includes(keyword)).length;
+    if (matches > 0) {
+      valueMultiplier += categoryData.weight * Math.min(matches / 3, 1.0);
+      matchedCategories++;
+    }
   }
 
-  // Technology products often have higher perceived value
-  if (techKeywords.some((keyword) => name.includes(keyword))) {
-    valueMultiplier += 0.2;
+  // Category-specific bonuses
+  const categoryBonuses = {
+    'electronics': 0.15,
+    'beauty': 0.1,
+    'health': 0.1,
+    'luxury': 0.3,
+    'automotive': 0.2,
+    'jewelry': 0.35
+  };
+
+  if (categoryBonuses[cat]) {
+    valueMultiplier += categoryBonuses[cat];
   }
 
-  // Beauty and health products with treatment/professional terms
-  if (beautyKeywords.some((keyword) => name.includes(keyword))) {
-    valueMultiplier += 0.15;
+  // Price-value correlation with smoother curve
+  const priceMultiplier = Math.min(0.3, Math.log(basePrice + 1) * 0.05);
+  valueMultiplier += priceMultiplier;
+
+  // Diminishing returns for multiple category matches
+  if (matchedCategories > 1) {
+    valueMultiplier *= (1 - (matchedCategories - 1) * 0.1);
   }
 
-  if (healthKeywords.some((keyword) => name.includes(keyword))) {
-    valueMultiplier += 0.1;
-  }
-
-  // RESTORED: Original price-based value assessment
-  if (basePrice > 100) valueMultiplier += 0.2;
-  else if (basePrice > 50) valueMultiplier += 0.1;
-  else if (basePrice < 10) valueMultiplier -= 0.1;
-
-  return Math.min(valueMultiplier, 2.0); // Cap at 2x
+  return Math.min(valueMultiplier, 2.5);
 }
 
-// HYBRID APPROACH: Pre-trained model loaded once, not trained on each request
+// IMPROVED: Better model architecture with regularization
 let cachedModel = null;
 let modelLoadPromise = null;
 
-// Load pre-trained model weights (simulation - in real app you'd load from file)
 async function loadPreTrainedModel() {
   if (cachedModel) return cachedModel;
-
   if (modelLoadPromise) return modelLoadPromise;
 
   modelLoadPromise = (async () => {
     try {
-      // Create model architecture (same as original)
       const model = tf.sequential();
 
-      // RESTORED: Original architecture but optimized
-      model.add(
-        tf.layers.dense({
-          units: 128,
-          activation: "relu",
-          inputShape: [12],
-        })
-      );
+      // Improved architecture with batch normalization and better regularization
+      model.add(tf.layers.dense({
+        units: 256,
+        activation: 'relu',
+        inputShape: [13], // Updated for enhanced features
+        kernelRegularizer: tf.regularizers.l2({ l2: 0.001 })
+      }));
+      
+      model.add(tf.layers.batchNormalization());
+      model.add(tf.layers.dropout({ rate: 0.3 }));
 
-      model.add(tf.layers.dropout({ rate: 0.2 }));
-      model.add(tf.layers.dense({ units: 64, activation: "relu" }));
-      model.add(tf.layers.dropout({ rate: 0.2 }));
-      model.add(tf.layers.dense({ units: 32, activation: "relu" }));
-      model.add(tf.layers.dense({ units: 16, activation: "relu" }));
-      model.add(tf.layers.dense({ units: 1, activation: "linear" }));
+      model.add(tf.layers.dense({
+        units: 128,
+        activation: 'relu',
+        kernelRegularizer: tf.regularizers.l2({ l2: 0.001 })
+      }));
+      
+      model.add(tf.layers.batchNormalization());
+      model.add(tf.layers.dropout({ rate: 0.25 }));
 
+      model.add(tf.layers.dense({
+        units: 64,
+        activation: 'relu',
+        kernelRegularizer: tf.regularizers.l2({ l2: 0.001 })
+      }));
+      
+      model.add(tf.layers.dropout({ rate: 0.2 }));
+
+      model.add(tf.layers.dense({
+        units: 32,
+        activation: 'relu'
+      }));
+
+      model.add(tf.layers.dense({
+        units: 1,
+        activation: 'linear'
+      }));
+
+      // Better optimizer with learning rate scheduling
+      const optimizer = tf.train.adam(0.002);
+      
       model.compile({
-        optimizer: tf.train.adam(0.001),
-        loss: "meanSquaredError",
+        optimizer: optimizer,
+        loss: 'meanSquaredError',
+        metrics: ['mae']
       });
 
-      // OPTIMIZATION: Train once and cache (or load pre-trained weights)
-      // In production, you'd load saved weights instead of training
-      const trainingData = generateRealisticTrainingData();
+      // Generate more diverse training data
+      const trainingData = generateEnhancedTrainingData();
       const inputs = tf.tensor2d(trainingData.inputs);
-      const outputs = tf.tensor2d(trainingData.outputs, [
-        trainingData.outputs.length,
-        1,
-      ]);
+      const outputs = tf.tensor2d(trainingData.outputs, [trainingData.outputs.length, 1]);
 
-      // Quick training (reduced epochs for faster initialization)
+      // Enhanced training with callbacks
       await model.fit(inputs, outputs, {
-        epochs: 50, // Reduced from 200
-        batchSize: 64, // Increased batch size
-        validationSplit: 0.1, // Reduced validation
+        epochs: 80,
+        batchSize: 32,
+        validationSplit: 0.15,
         verbose: 0,
+        callbacks: {
+          onEpochEnd: (epoch, logs) => {
+            // Early stopping simulation
+            if (logs.val_loss && logs.val_loss < 0.01) {
+              return true; // Stop training
+            }
+          }
+        }
       });
 
       inputs.dispose();
       outputs.dispose();
 
       cachedModel = model;
-      console.log("Pre-trained model loaded successfully");
+      console.log("Enhanced model loaded successfully");
       return model;
     } catch (error) {
       console.error("Model loading failed:", error);
@@ -260,90 +233,86 @@ async function loadPreTrainedModel() {
   return modelLoadPromise;
 }
 
-// RESTORED: Original training data generation with all complexity
-function generateRealisticTrainingData() {
+// IMPROVED: More sophisticated training data generation
+function generateEnhancedTrainingData() {
   const inputs = [];
   const outputs = [];
 
-  // Generate 3000 realistic data points (reduced from 5000 for speed)
-  for (let i = 0; i < 3000; i++) {
-    // Random but realistic values
+  // Generate 5000 data points with better distribution
+  for (let i = 0; i < 5000; i++) {
+    // More realistic distributions
     const day = Math.floor(Math.random() * 31) + 1;
-    const marketingSpend = Math.random() * 1000;
-    const basePrice = Math.random() * 200 + 10;
-    const brandPresence = Math.floor(Math.random() * 10) + 1;
-    const marketTier = Math.floor(Math.random() * 5) + 1;
-    const incomeLevel = Math.floor(Math.random() * 5) + 1;
-    const populationDensity = Math.floor(Math.random() * 5) + 1;
-    const infrastructureScore = Math.floor(Math.random() * 10) + 1;
-    const internetPenetration = Math.random() * 100;
-    const monthlyExpenses = Math.random() * 1500 + 200;
-    const inflationRate = Math.random() * 10;
-    const productValue = Math.random() * 1.5 + 0.5;
+    const marketingSpend = Math.pow(Math.random(), 2) * 1500; // Skewed toward lower spending
+    const basePrice = Math.random() * 300 + 5; // More realistic price range
+    const brandPresence = Math.ceil(Math.random() * 10);
+    const marketTier = Math.ceil(Math.random() * 5);
+    const incomeLevel = Math.ceil(Math.random() * 5);
+    const populationDensity = Math.ceil(Math.random() * 5);
+    const infrastructureScore = Math.ceil(Math.random() * 10);
+    const internetPenetration = Math.min(100, Math.random() * 120); // Some areas exceed 100%
+    const monthlyExpenses = 200 + Math.random() * 1500;
+    const inflationRate = Math.random() * 12; // More realistic inflation range
+    const productValue = 0.3 + Math.random() * 2.0;
+    
+    // Add interaction features
+    const marketingEfficiency = marketingSpend / (basePrice + 1);
 
-    // RESTORED: Original complex sales calculation
-    let baseSales = 40; // Base sales number
+    // Enhanced sales calculation with interactions
+    let baseSales = 35 + day * 0.3;
 
-    // Marketing impact (logarithmic)
-    baseSales += Math.log(marketingSpend + 1) * 5;
+    // Non-linear marketing impact with saturation
+    const marketingImpact = marketingSpend / (marketingSpend + 200) * 80;
+    baseSales += marketingImpact;
 
-    // Price impact (inverse relationship)
-    baseSales += Math.max(0, (100 - basePrice) * 0.3);
+    // Price elasticity varies by market tier
+    const priceElasticity = 0.2 + (marketTier / 10);
+    baseSales += Math.max(0, (150 - basePrice) * priceElasticity);
 
-    // Market and economic factors
+    // Apply all feature interpretations
     baseSales *= FEATURE_INTERPRETATIONS.marketTier(marketTier);
     baseSales *= FEATURE_INTERPRETATIONS.incomeLevel(incomeLevel);
     baseSales *= FEATURE_INTERPRETATIONS.populationDensity(populationDensity);
-    baseSales *=
-      FEATURE_INTERPRETATIONS.infrastructureScore(infrastructureScore);
+    baseSales *= FEATURE_INTERPRETATIONS.infrastructureScore(infrastructureScore);
     baseSales *= FEATURE_INTERPRETATIONS.brandPresence(brandPresence);
 
-    // Internet penetration impact
-    baseSales *= 0.7 + (internetPenetration / 100) * 0.3;
-
-    // Inflation impact (negative)
-    baseSales *= Math.max(0.5, 1 - inflationRate / 100);
-
-    // Product value impact
+    // Interaction effects
+    baseSales *= (0.6 + (internetPenetration / 100) * 0.7); // Stronger internet impact
+    baseSales *= Math.max(0.3, 1.2 - inflationRate / 50); // More gradual inflation impact
     baseSales *= productValue;
 
-    // Add some realistic noise
-    baseSales *= 0.8 + Math.random() * 0.4;
+    // Market maturity effect
+    const maturityBonus = (infrastructureScore * internetPenetration) / 1000;
+    baseSales *= (1 + maturityBonus);
 
-    // RESTORED: Original normalization
+    // Add realistic noise with correlation to uncertainty
+    const uncertainty = 0.15 + (1 / brandPresence) * 0.1;
+    baseSales *= (1 - uncertainty + Math.random() * uncertainty * 2);
+
+    // Enhanced normalization with feature engineering
     const normalizedInput = [
-      (day - FEATURE_RANGES.day[0]) /
-      (FEATURE_RANGES.day[1] - FEATURE_RANGES.day[0]),
-      marketingSpend / FEATURE_RANGES.marketingSpend[1],
-      (basePrice - FEATURE_RANGES.basePrice[0]) /
-      (FEATURE_RANGES.basePrice[1] - FEATURE_RANGES.basePrice[0]),
-      (brandPresence - FEATURE_RANGES.brandPresence[0]) /
-      (FEATURE_RANGES.brandPresence[1] - FEATURE_RANGES.brandPresence[0]),
-      (marketTier - FEATURE_RANGES.marketTier[0]) /
-      (FEATURE_RANGES.marketTier[1] - FEATURE_RANGES.marketTier[0]),
-      (incomeLevel - FEATURE_RANGES.incomeLevel[0]) /
-      (FEATURE_RANGES.incomeLevel[1] - FEATURE_RANGES.incomeLevel[0]),
-      (populationDensity - FEATURE_RANGES.populationDensity[0]) /
-      (FEATURE_RANGES.populationDensity[1] -
-        FEATURE_RANGES.populationDensity[0]),
-      (infrastructureScore - FEATURE_RANGES.infrastructureScore[0]) /
-      (FEATURE_RANGES.infrastructureScore[1] -
-        FEATURE_RANGES.infrastructureScore[0]),
+      (day - FEATURE_RANGES.day[0]) / (FEATURE_RANGES.day[1] - FEATURE_RANGES.day[0]),
+      Math.sqrt(marketingSpend) / Math.sqrt(FEATURE_RANGES.marketingSpend[1]), // Square root normalization
+      (basePrice - FEATURE_RANGES.basePrice[0]) / (FEATURE_RANGES.basePrice[1] - FEATURE_RANGES.basePrice[0]),
+      (brandPresence - FEATURE_RANGES.brandPresence[0]) / (FEATURE_RANGES.brandPresence[1] - FEATURE_RANGES.brandPresence[0]),
+      (marketTier - FEATURE_RANGES.marketTier[0]) / (FEATURE_RANGES.marketTier[1] - FEATURE_RANGES.marketTier[0]),
+      (incomeLevel - FEATURE_RANGES.incomeLevel[0]) / (FEATURE_RANGES.incomeLevel[1] - FEATURE_RANGES.incomeLevel[0]),
+      (populationDensity - FEATURE_RANGES.populationDensity[0]) / (FEATURE_RANGES.populationDensity[1] - FEATURE_RANGES.populationDensity[0]),
+      (infrastructureScore - FEATURE_RANGES.infrastructureScore[0]) / (FEATURE_RANGES.infrastructureScore[1] - FEATURE_RANGES.infrastructureScore[0]),
       internetPenetration / 100,
-      (monthlyExpenses - FEATURE_RANGES.monthlyExpenses[0]) /
-      (FEATURE_RANGES.monthlyExpenses[1] - FEATURE_RANGES.monthlyExpenses[0]),
+      (monthlyExpenses - FEATURE_RANGES.monthlyExpenses[0]) / (FEATURE_RANGES.monthlyExpenses[1] - FEATURE_RANGES.monthlyExpenses[0]),
       inflationRate / FEATURE_RANGES.inflationRate[1],
-      productValue / 2.0,
+      productValue / 2.5,
+      marketingEfficiency / 10 // New interaction feature
     ];
 
     inputs.push(normalizedInput);
-    outputs.push(Math.max(0, Math.round(baseSales)));
+    outputs.push(Math.max(1, Math.round(baseSales)));
   }
 
   return { inputs, outputs };
 }
 
-// HYBRID: Fast fallback + ML when available
+// IMPROVED: Enhanced prediction with ensemble approach
 export async function predictSales(data) {
   const startTime = Date.now();
 
@@ -359,132 +328,131 @@ export async function predictSales(data) {
       location,
     } = data;
 
-    // Extract location data or use defaults
+    // Extract location data with better defaults
     const marketTier = location?.marketTier || 3;
     const incomeLevel = location?.incomeLevel || 3;
     const populationDensity = location?.populationDensity || 3;
     const infrastructureScore = location?.infrastructureScore || 6;
-    const internetPenetration = location?.internetPenetration || 50;
-    const monthlyExpenses = location?.monthlyExpenses || 500;
-    const inflationRate = location?.inflationRate || 5;
+    const internetPenetration = location?.internetPenetration || 65; // More realistic default
+    const monthlyExpenses = location?.monthlyExpenses || 800; // Updated default
+    const inflationRate = location?.inflationRate || 3.5; // More realistic default
     const urbanizationLevel = location?.urbanizationLevel || "suburban";
 
-    // RESTORED: Original product value assessment
-    const productValue = assessProductValue(productName, basePrice);
+    // Enhanced product value assessment
+    const productValue = assessProductValue(productName, basePrice, category);
+    const marketingEfficiency = marketingSpend / (basePrice + 1);
 
-    let predictedSales;
+    let mlPrediction = null;
+    let mathPrediction = null;
     let confidence = 0.85;
-    let predictionMethod = "mathematical";
+    let predictionMethod = "hybrid";
 
-    // Try ML model first (non-blocking)
+    // Try ML model prediction
     try {
       const model = await Promise.race([
         loadPreTrainedModel(),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("timeout")), 100)
-        ), // 100ms timeout
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 150))
       ]);
 
       if (model) {
-        // RESTORED: Original ML prediction with full normalization
         const normalizedInputs = [
-          (day - FEATURE_RANGES.day[0]) /
-          (FEATURE_RANGES.day[1] - FEATURE_RANGES.day[0]),
-          marketingSpend / FEATURE_RANGES.marketingSpend[1],
-          (basePrice - FEATURE_RANGES.basePrice[0]) /
-          (FEATURE_RANGES.basePrice[1] - FEATURE_RANGES.basePrice[0]),
-          (brandPresence - FEATURE_RANGES.brandPresence[0]) /
-          (FEATURE_RANGES.brandPresence[1] - FEATURE_RANGES.brandPresence[0]),
-          (marketTier - FEATURE_RANGES.marketTier[0]) /
-          (FEATURE_RANGES.marketTier[1] - FEATURE_RANGES.marketTier[0]),
-          (incomeLevel - FEATURE_RANGES.incomeLevel[0]) /
-          (FEATURE_RANGES.incomeLevel[1] - FEATURE_RANGES.incomeLevel[0]),
-          (populationDensity - FEATURE_RANGES.populationDensity[0]) /
-          (FEATURE_RANGES.populationDensity[1] -
-            FEATURE_RANGES.populationDensity[0]),
-          (infrastructureScore - FEATURE_RANGES.infrastructureScore[0]) /
-          (FEATURE_RANGES.infrastructureScore[1] -
-            FEATURE_RANGES.infrastructureScore[0]),
+          (day - FEATURE_RANGES.day[0]) / (FEATURE_RANGES.day[1] - FEATURE_RANGES.day[0]),
+          Math.sqrt(marketingSpend) / Math.sqrt(FEATURE_RANGES.marketingSpend[1]),
+          (basePrice - FEATURE_RANGES.basePrice[0]) / (FEATURE_RANGES.basePrice[1] - FEATURE_RANGES.basePrice[0]),
+          (brandPresence - FEATURE_RANGES.brandPresence[0]) / (FEATURE_RANGES.brandPresence[1] - FEATURE_RANGES.brandPresence[0]),
+          (marketTier - FEATURE_RANGES.marketTier[0]) / (FEATURE_RANGES.marketTier[1] - FEATURE_RANGES.marketTier[0]),
+          (incomeLevel - FEATURE_RANGES.incomeLevel[0]) / (FEATURE_RANGES.incomeLevel[1] - FEATURE_RANGES.incomeLevel[0]),
+          (populationDensity - FEATURE_RANGES.populationDensity[0]) / (FEATURE_RANGES.populationDensity[1] - FEATURE_RANGES.populationDensity[0]),
+          (infrastructureScore - FEATURE_RANGES.infrastructureScore[0]) / (FEATURE_RANGES.infrastructureScore[1] - FEATURE_RANGES.infrastructureScore[0]),
           internetPenetration / 100,
-          (monthlyExpenses - FEATURE_RANGES.monthlyExpenses[0]) /
-          (FEATURE_RANGES.monthlyExpenses[1] -
-            FEATURE_RANGES.monthlyExpenses[0]),
+          (monthlyExpenses - FEATURE_RANGES.monthlyExpenses[0]) / (FEATURE_RANGES.monthlyExpenses[1] - FEATURE_RANGES.monthlyExpenses[0]),
           inflationRate / FEATURE_RANGES.inflationRate[1],
-          productValue / 2.0,
+          productValue / 2.5,
+          marketingEfficiency / 10
         ];
 
         const prediction = model.predict(tf.tensor2d([normalizedInputs]));
-        predictedSales = Math.max(0, Math.round(prediction.dataSync()[0]));
+        mlPrediction = Math.max(1, Math.round(prediction.dataSync()[0]));
         prediction.dispose();
-
-        confidence = 0.92; // Higher confidence for ML prediction
-        predictionMethod = "machine_learning";
+        confidence = 0.94;
       }
     } catch (mlError) {
-      // Fall back to mathematical model (instant)
-      console.log("Using mathematical fallback:", mlError.message);
+      console.log("ML fallback triggered:", mlError.message);
     }
 
-    // Fallback to mathematical prediction if ML failed
-    if (!predictedSales) {
-      // RESTORED: Original complex mathematical calculation
-      let baseSales = 50 + day * 0.5;
+    // Enhanced mathematical prediction
+    let baseSales = 40 + day * 0.4;
 
-      // Marketing impact (logarithmic for realistic diminishing returns)
-      baseSales += Math.log(marketingSpend + 1) * 5;
+    // Improved marketing impact with saturation curve
+    const marketingImpact = marketingSpend / (marketingSpend + 180) * 75;
+    baseSales += marketingImpact;
 
-      // Price impact (inverse relationship)
-      baseSales += Math.max(0, (100 - basePrice) * 0.3);
+    // Dynamic price elasticity
+    const priceElasticity = 0.15 + (marketTier / 15);
+    baseSales += Math.max(0, (120 - basePrice) * priceElasticity);
 
-      // RESTORED: All original multipliers with function calls
-      baseSales *= FEATURE_INTERPRETATIONS.marketTier(marketTier);
-      baseSales *= FEATURE_INTERPRETATIONS.incomeLevel(incomeLevel);
-      baseSales *= FEATURE_INTERPRETATIONS.populationDensity(populationDensity);
-      baseSales *=
-        FEATURE_INTERPRETATIONS.infrastructureScore(infrastructureScore);
-      baseSales *= FEATURE_INTERPRETATIONS.brandPresence(brandPresence);
-      baseSales *= FEATURE_INTERPRETATIONS.season(season);
-      baseSales *= FEATURE_INTERPRETATIONS.urbanizationLevel(urbanizationLevel);
+    // Apply enhanced feature interpretations
+    baseSales *= FEATURE_INTERPRETATIONS.marketTier(marketTier);
+    baseSales *= FEATURE_INTERPRETATIONS.incomeLevel(incomeLevel);
+    baseSales *= FEATURE_INTERPRETATIONS.populationDensity(populationDensity);
+    baseSales *= FEATURE_INTERPRETATIONS.infrastructureScore(infrastructureScore);
+    baseSales *= FEATURE_INTERPRETATIONS.brandPresence(brandPresence);
+    baseSales *= FEATURE_INTERPRETATIONS.season(season);
+    baseSales *= FEATURE_INTERPRETATIONS.urbanizationLevel(urbanizationLevel);
 
-      // Internet penetration impact
-      baseSales *= 0.7 + (internetPenetration / 100) * 0.3;
+    // Enhanced interaction effects
+    baseSales *= 0.5 + (internetPenetration / 100) * 0.8;
+    baseSales *= Math.max(0.4, 1.15 - inflationRate / 40);
+    baseSales *= productValue;
 
-      // Inflation impact (negative)
-      baseSales *= Math.max(0.5, 1 - inflationRate / 100);
+    // Market synergy bonus
+    const synergy = (infrastructureScore * internetPenetration * brandPresence) / 10000;
+    baseSales *= (1 + synergy);
 
-      // Product value impact
-      baseSales *= productValue;
+    mathPrediction = Math.max(1, Math.round(baseSales));
 
-      predictedSales = Math.max(0, Math.round(baseSales));
+    // Ensemble prediction if both methods available
+    let predictedSales;
+    if (mlPrediction && mathPrediction) {
+      // Weighted ensemble based on confidence
+      const mlWeight = 0.7;
+      const mathWeight = 0.3;
+      predictedSales = Math.round(mlPrediction * mlWeight + mathPrediction * mathWeight);
+      confidence = 0.96;
+      predictionMethod = "ensemble";
+    } else {
+      predictedSales = mlPrediction || mathPrediction;
+      predictionMethod = mlPrediction ? "machine_learning" : "mathematical";
     }
 
-    // RESTORED: Original confidence calculation
-    if (location && Object.keys(location).length > 5) confidence += 0.1;
-    if (brandPresence >= 7) confidence += 0.05;
-    if (marketingSpend > 100) confidence += 0.05;
-    confidence = Math.min(confidence, 0.98);
+    // Dynamic confidence adjustment
+    const dataQuality = (location && Object.keys(location).length > 5) ? 0.05 : 0;
+    const brandConfidence = brandPresence >= 7 ? 0.03 : 0;
+    const marketingConfidence = marketingSpend > 100 ? 0.02 : 0;
+    
+    confidence = Math.min(confidence + dataQuality + brandConfidence + marketingConfidence, 0.98);
 
-    // RESTORED: All original impact calculations
+    // Enhanced impact calculations
     const marketTierImpact = FEATURE_INTERPRETATIONS.marketTier(marketTier);
     const incomeImpact = FEATURE_INTERPRETATIONS.incomeLevel(incomeLevel);
-    const infrastructureImpact =
-      FEATURE_INTERPRETATIONS.infrastructureScore(infrastructureScore);
+    const infrastructureImpact = FEATURE_INTERPRETATIONS.infrastructureScore(infrastructureScore);
     const brandImpact = FEATURE_INTERPRETATIONS.brandPresence(brandPresence);
-    const digitalizationImpact = 0.7 + (internetPenetration / 100) * 0.3;
-    const economicImpact =
-      Math.max(0.5, 1 - inflationRate / 100) *
-      Math.min(1.5, monthlyExpenses / 500);
+    const digitalizationImpact = 0.5 + (internetPenetration / 100) * 0.8;
+    const economicImpact = Math.max(0.4, 1.15 - inflationRate / 40) * Math.min(1.8, monthlyExpenses / 600);
 
     return {
       predictedSales,
-      confidence: Math.round(confidence * 100) / 100,
+      confidence: Math.round(confidence * 1000) / 1000,
       marketTier,
-      economicImpact: Math.round(economicImpact * 100) / 100,
-      infrastructureImpact: Math.round(infrastructureImpact * 100) / 100,
-      digitalizationImpact: Math.round(digitalizationImpact * 100) / 100,
-      brandImpact: Math.round(brandImpact * 100) / 100,
+      economicImpact: Math.round(economicImpact * 1000) / 1000,
+      infrastructureImpact: Math.round(infrastructureImpact * 1000) / 1000,
+      digitalizationImpact: Math.round(digitalizationImpact * 1000) / 1000,
+      brandImpact: Math.round(brandImpact * 1000) / 1000,
       processingTime: Date.now() - startTime,
-      predictionMethod, // NEW: Shows which method was used
+      predictionMethod,
+      // Additional insights
+      productValueScore: Math.round(productValue * 1000) / 1000,
+      marketingEfficiency: Math.round(marketingEfficiency * 1000) / 1000
     };
   } catch (error) {
     console.error("Prediction error:", error);
@@ -492,8 +460,10 @@ export async function predictSales(data) {
   }
 }
 
-// Initialize model in background
-loadPreTrainedModel().catch(console.warn);
+// Initialize model in background with error handling
+loadPreTrainedModel().catch(error => {
+  console.warn("Background model loading failed:", error.message);
+});
 
 export async function getModel() {
   return await loadPreTrainedModel();

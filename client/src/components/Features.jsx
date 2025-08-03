@@ -45,13 +45,55 @@ const features = [
   }
 ];
 
-const colorMap = {
-  primary: 'bg-blue-100 text-blue-600',
-  purple: 'bg-purple-100 text-purple-600', 
-  blue: 'bg-indigo-100 text-indigo-600',
-  green: 'bg-green-100 text-green-600',
-  orange: 'bg-orange-100 text-orange-600',
-  teal: 'bg-teal-100 text-teal-600',
+const colorConfig = {
+  primary: {
+    bg: 'bg-gradient-to-br from-blue-50 to-indigo-50',
+    icon: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+    text: 'text-blue-700',
+    border: 'border-blue-200',
+    shadow: 'shadow-blue-500/20',
+    hover: 'hover:shadow-blue-500/30'
+  },
+  purple: {
+    bg: 'bg-gradient-to-br from-purple-50 to-violet-50',
+    icon: 'bg-gradient-to-br from-purple-500 to-violet-600',
+    text: 'text-purple-700',
+    border: 'border-purple-200',
+    shadow: 'shadow-purple-500/20',
+    hover: 'hover:shadow-purple-500/30'
+  },
+  blue: {
+    bg: 'bg-gradient-to-br from-indigo-50 to-blue-50',
+    icon: 'bg-gradient-to-br from-indigo-500 to-blue-600',
+    text: 'text-indigo-700',
+    border: 'border-indigo-200',
+    shadow: 'shadow-indigo-500/20',
+    hover: 'hover:shadow-indigo-500/30'
+  },
+  green: {
+    bg: 'bg-gradient-to-br from-emerald-50 to-green-50',
+    icon: 'bg-gradient-to-br from-emerald-500 to-green-600',
+    text: 'text-emerald-700',
+    border: 'border-emerald-200',
+    shadow: 'shadow-emerald-500/20',
+    hover: 'hover:shadow-emerald-500/30'
+  },
+  orange: {
+    bg: 'bg-gradient-to-br from-orange-50 to-amber-50',
+    icon: 'bg-gradient-to-br from-orange-500 to-amber-600',
+    text: 'text-orange-700',
+    border: 'border-orange-200',
+    shadow: 'shadow-orange-500/20',
+    hover: 'hover:shadow-orange-500/30'
+  },
+  teal: {
+    bg: 'bg-gradient-to-br from-teal-50 to-cyan-50',
+    icon: 'bg-gradient-to-br from-teal-500 to-cyan-600',
+    text: 'text-teal-700',
+    border: 'border-teal-200',
+    shadow: 'shadow-teal-500/20',
+    hover: 'hover:shadow-teal-500/30'
+  }
 };
 
 export default function Features() {
@@ -62,87 +104,129 @@ export default function Features() {
   };
 
   return (
-    <section id="features" className="py-16 bg-gray-50">
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-    <div className="text-center mb-16">
-      <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 rounded-full text-sm font-semibold mb-6 shadow-sm">
-        <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
-        AI-Powered Business Tools
+    <section id="features" className="relative py-12 bg-gradient-to-b from-gray-50 via-white to-gray-50 overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
       </div>
-      <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-gray-900 bg-clip-text text-transparent mb-6">
-        Transform Your Business Operations
-      </h2>
-      <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-        Streamline your workflow with our comprehensive suite of AI-powered tools designed for modern businesses
-      </p>
-    </div>
-            
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {features.map((feature, index) => (
-        <div 
-          key={index} 
-          onClick={() => handleFeatureClick(feature.route)}
-          className="group relative bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-gray-200/50 transition-all duration-500 ease-out hover:-translate-y-3 hover:shadow-2xl hover:shadow-blue-500/10 cursor-pointer overflow-hidden"
-          style={{
-            animationDelay: `${index * 100}ms`
-          }}
-        >
-          {/* Gradient Background on Hover */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500 rounded-2xl`}></div>
-          
-          {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 w-20 h-20 opacity-10 transform rotate-12 translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
-            <i className={`fas fa-${feature.icon} text-4xl text-gray-400`}></i>
-          </div>
 
-          {/* Icon Container */}
-          <div className={`relative w-16 h-16 ${colorMap[feature.color]} rounded-2xl flex items-center justify-center mb-6 border-2 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
-            <i className={`fas fa-${feature.icon} text-2xl`}></i>
-            <div className="absolute inset-0 rounded-2xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </div>
-
-          {/* Content */}
-          <div className="relative z-10">
-            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-800 transition-colors duration-300">
-              {feature.title}
-            </h3>
-            <p className="text-gray-600 leading-relaxed mb-6 group-hover:text-gray-700 transition-colors duration-300">
-              {feature.description}
-            </p>
-
-            {/* CTA Button */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center text-blue-600 font-semibold group-hover:text-blue-700 transition-colors duration-300">
-                <span className="mr-2">Explore Tool</span>
-                <i className="fas fa-arrow-right transform group-hover:translate-x-2 transition-transform duration-300"></i>
-              </div>
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 transform scale-0 group-hover:scale-100">
-                <i className="fas fa-external-link-alt text-white text-xs"></i>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Header Section */}
+        <div className="text-center mb-20">
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-slate-100 via-blue-50 to-indigo-100 border border-slate-200/60 rounded-full text-sm font-semibold text-slate-700 mb-8 shadow-sm backdrop-blur-sm">
+            <div className="relative">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <div className="absolute inset-0 w-2 h-2 bg-blue-400 rounded-full animate-ping"></div>
             </div>
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              AI-Powered Business Tools
+            </span>
           </div>
-
-          {/* Hover Border Effect */}
-          <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-200/50 rounded-2xl transition-all duration-500"></div>
           
-          {/* Shine Effect */}
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+            <span className="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 bg-clip-text text-transparent">
+              Transform Your
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Business Operations
+            </span>
+          </h2>
+          
+          <p className="text-xl md:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed font-light">
+            Streamline your workflow with our comprehensive suite of AI-powered tools designed for modern businesses
+          </p>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+          {features.map((feature, index) => {
+            const config = colorConfig[feature.color];
+            
+            return (
+              <div 
+                key={index} 
+                onClick={() => handleFeatureClick(feature.route)}
+                className={`group relative bg-white/90 backdrop-blur-sm p-8 lg:p-10 rounded-3xl border border-slate-200/60 transition-all duration-700 ease-out hover:-translate-y-4 hover:scale-[1.02] cursor-pointer ${config.shadow} hover:shadow-2xl ${config.hover}`}
+                style={{
+                  animationDelay: `${index * 150}ms`
+                }}
+              >
+                {/* Gradient Overlay */}
+                <div className={`absolute inset-0 ${config.bg} opacity-0 group-hover:opacity-60 transition-all duration-700 rounded-3xl`} />
+                
+                {/* Decorative Corner Element */}
+                <div className="absolute -top-1 -right-1 w-24 h-24 opacity-5 group-hover:opacity-10 transition-opacity duration-500">
+                  <div className={`w-full h-full ${config.icon} rounded-full transform rotate-12 scale-75`} />
+                </div>
+
+                {/* Icon Container */}
+                <div className="relative mb-8">
+                  <div className={`relative w-20 h-20 ${config.icon} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+                    <i className={`fas fa-${feature.icon} text-3xl text-white`}></i>
+                    
+                    {/* Icon Shine Effect */}
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </div>
+                  
+                  {/* Icon Shadow */}
+                  <div className={`absolute top-2 left-2 w-20 h-20 ${config.icon} rounded-2xl opacity-20 blur-lg -z-10 group-hover:blur-xl transition-all duration-500`} />
+                </div>
+
+                {/* Content */}
+                <div className="relative z-10 space-y-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-4 group-hover:text-slate-800 transition-colors duration-300 leading-tight">
+                      {feature.title}
+                    </h3>
+                    <p className="text-slate-600 leading-relaxed text-lg group-hover:text-slate-700 transition-colors duration-300">
+                      {feature.description}
+                    </p>
+                  </div>
+
+                  {/* Action Area */}
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100 group-hover:border-slate-200 transition-colors duration-300">
+                    <div className={`flex items-center ${config.text} font-semibold text-lg group-hover:gap-3 transition-all duration-300`}>
+                      <span>Explore Tool</span>
+                      <i className="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform duration-300"></i>
+                    </div>
+                    
+                    <div className={`w-12 h-12 ${config.icon} rounded-xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-500 transform scale-0 group-hover:scale-100 shadow-lg`}>
+                      <i className="fas fa-external-link-alt text-white text-sm"></i>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Border Glow Effect */}
+                <div className={`absolute inset-0 ${config.border} border-2 opacity-0 group-hover:opacity-100 rounded-3xl transition-all duration-500`} />
+                
+                {/* Shine Animation */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 overflow-hidden rounded-3xl">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1200 delay-200" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Bottom Decorative Element */}
+        <div className="flex justify-center mt-20">
+          <div className="flex items-center gap-2">
+            {[...Array(3)].map((_, i) => (
+              <div 
+                key={i} 
+                className="w-2 h-2 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full"
+                style={{
+                  animationDelay: `${i * 200}ms`,
+                  animation: 'pulse 2s infinite'
+                }}
+              />
+            ))}
           </div>
         </div>
-      ))}
-    </div>
-
-    {/* Bottom Section */}
-    <div className="text-center mt-16">
-      <div className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl transform hover:-translate-y-1 group">
-        <i className="fas fa-rocket mr-3 group-hover:animate-bounce"></i>
-        Start Your AI Journey Today
-        <i className="fas fa-arrow-right ml-3 transform group-hover:translate-x-1 transition-transform duration-300"></i>
       </div>
-      <p className="text-gray-500 text-sm mt-4">No credit card required • Free trial available</p>
-    </div>
-  </div>
-</section>
+    </section>
   );
 }
