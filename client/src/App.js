@@ -25,6 +25,7 @@ import AddInventory from "./pages/AddInventory.jsx";
 import InventoryDetail from "./pages/InventoryDetail.jsx";
 import EditInventory from "./pages/EditInventory.jsx";
 import OrderManagement from "./pages/OrderManagement.jsx";
+import InventoryAnomalyDetector from './components/InventoryAnomalyDetector.tsx'
 
 export default function App() {
   function Home() {
@@ -86,6 +87,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <InvoiceGenerator />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/anomaly-detection"
+          element={
+            <PrivateRoute>
+              <InventoryAnomalyDetector />
             </PrivateRoute>
           }
         />
