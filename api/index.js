@@ -12,6 +12,7 @@ import predictionRoutes from "./routes/predictionRoutes.js";
 import githubAuthRoutes from "./routes/githubAuthRoutes.js"
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import dbQueryRoutes from "./routes/dbQueryRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -45,6 +46,8 @@ app.use('/api/email', emailGeneratorRoutes);
 app.use("/api/predictions", predictionRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/db', dbQueryRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Backend server is working!");
