@@ -41,12 +41,6 @@ export default function HowItWorks() {
           ))}
         </div>
 
-        <div className="mt-16 text-center">
-          <Link to="#" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 transition duration-150 ease-in-out">
-            See It In Action
-            <i className="fas fa-arrow-right ml-2"></i>
-          </Link>
-        </div>
       </div>
     </section>
   );

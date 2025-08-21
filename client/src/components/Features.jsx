@@ -32,17 +32,17 @@ const features = [
   {
     icon: 'camera',
     color: 'orange',
-    title: 'Invoice Scanner',
-    description: 'Scan and extract data from invoices automatically using OCR technology.',
-    route: '/invoice-scanner'
+    title: 'Anomaly detection',
+    description: "Detect unusual patterns and anomalies in business data to prevent errors and fraud.",
+    route: '/anomaly-detection'
   },
   {
-    icon: 'barcode',
-    color: 'teal',
-    title: 'Barcode Scanner',
-    description: 'Scan product barcodes for inventory management and product identification.',
-    route: '/barcode-scanner'
-  }
+  icon: 'boxes',
+  color: 'indigo',
+  title: 'Inventory',
+  description: 'Track, organize, and manage your product inventory efficiently.',
+  route: '/inventory'
+},
 ];
 
 const colorConfig = {
@@ -93,7 +93,15 @@ const colorConfig = {
     border: 'border-teal-200',
     shadow: 'shadow-teal-500/20',
     hover: 'hover:shadow-teal-500/30'
-  }
+  },
+  indigo: {
+  bg: 'bg-gradient-to-br from-indigo-50 to-slate-50',
+  icon: 'bg-gradient-to-br from-indigo-500 to-indigo-700',
+  text: 'text-indigo-700',
+  border: 'border-indigo-200',
+  shadow: 'shadow-indigo-500/20',
+  hover: 'hover:shadow-indigo-500/30'
+}
 };
 
 export default function Features() {

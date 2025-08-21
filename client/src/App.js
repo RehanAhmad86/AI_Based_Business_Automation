@@ -3,7 +3,7 @@ import FAQ from "./components/FAQ";
 import CTA from "./components/CTA";
 import Hero from "./components/Hero";
 import TrustedBy from "./components/TrustedBy";
-import Features from "./components/Features";
+import Features from "./components/Features.jsx";
 import HowItWorks from "./components/HowItWorks";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthLayout from "./auth/AuthLayout";
@@ -25,7 +25,10 @@ import AddInventory from "./pages/AddInventory.jsx";
 import InventoryDetail from "./pages/InventoryDetail.jsx";
 import EditInventory from "./pages/EditInventory.jsx";
 import OrderManagement from "./pages/OrderManagement.jsx";
-import InventoryAnomalyDetector from './components/InventoryAnomalyDetector.tsx'
+import InventoryAnomalyDetector from "./components/InventoryAnomalyDetector.tsx";
+import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 export default function App() {
   function Home() {
@@ -155,6 +158,17 @@ export default function App() {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/sales-analytics"
+            element={
+              <PrivateRoute>
+                <SalesAnalyticsDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route path="/about" element={<About />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
         </Route>
       </Routes>
     </Router>
