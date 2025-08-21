@@ -12,7 +12,7 @@ export const openAIRequest = async (messages, model = 'gpt-4o-mini') => {
       },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.NEXT_OPENAI_API_KEY}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json'
         }
       }
@@ -50,7 +50,7 @@ export const openAIImageRequest = async (imageBase64, prompt, model = 'gpt-4o') 
       },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.NEXT_OPENAI_API_KEY}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json'
         }
       }

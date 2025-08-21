@@ -62,7 +62,7 @@ export const SalesAnalyticsDashboard = () => {
     try {
       setLoading(true);
       const token = localStorage && localStorage.getItem("token");
-      const res = await fetch("/api/predictions", {
+      const res = await fetch("http://localhost:5000/api/predictions", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -111,7 +111,7 @@ export const SalesAnalyticsDashboard = () => {
         .slice(0, 3)
         .map((p) => p.productName);
 
-      const response = await fetch("/api/ai/insights", {
+      const response = await fetch("http://localhost:5000/api/ai/insights", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   FaChevronDown,
   FaUser,
@@ -16,54 +16,58 @@ import {
   FaShoppingCart,
   FaPlus,
   FaCog,
-} from "react-icons/fa"
-import { useSelector } from "react-redux"
-import { Link, useNavigate } from "react-router-dom"
-import Image from "react-bootstrap/Image"
-import DeleteAccountModal from "./DeleteAccountModal"
+} from "react-icons/fa";
+import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import Image from "react-bootstrap/Image";
+import DeleteAccountModal from "./DeleteAccountModal";
 
 export default function Navbar() {
-  const [showDropdown, setShowDropdown] = useState(false)
-  const [showProfileModal, setShowProfileModal] = useState(false)
-  const user = useSelector((state) => state.user.currentUser)
-  const navigate = useNavigate()
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const user = useSelector((state) => state.user.currentUser);
+  const navigate = useNavigate();
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleAccountDeleted = () => {
-    setShowDeleteModal(false)
-    navigate("/")
-    window.location.reload()
-  }
+    setShowDeleteModal(false);
+    navigate("/");
+    window.location.reload();
+  };
 
   const handleSignOut = () => {
-    localStorage.removeItem("persist:root")
-    localStorage.removeItem("token")
-    localStorage.removeItem("_persist")
+    localStorage.removeItem("persist:root");
+    localStorage.removeItem("token");
+    localStorage.removeItem("_persist");
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith("persist:") || key.includes("user") || key.includes("auth")) {
-        localStorage.removeItem(key)
+      if (
+        key.startsWith("persist:") ||
+        key.includes("user") ||
+        key.includes("auth")
+      ) {
+        localStorage.removeItem(key);
       }
-    })
-    setShowDropdown(false)
-    navigate("/auth/signin")
-    window.location.reload()
-  }
+    });
+    setShowDropdown(false);
+    navigate("/auth/signin");
+    window.location.reload();
+  };
 
   const handleProfileClick = () => {
-    setShowDropdown(false)
-    setShowProfileModal(true)
-  }
+    setShowDropdown(false);
+    setShowProfileModal(true);
+  };
 
   const closeProfileModal = () => {
-    setShowProfileModal(false)
-  }
+    setShowProfileModal(false);
+  };
 
   const handleModalOutsideClick = (e) => {
     if (e.target.classList.contains("modal-backdrop")) {
-      closeProfileModal()
+      closeProfileModal();
     }
-  }
+  };
 
   return (
     <>
@@ -80,7 +84,9 @@ export default function Navbar() {
                   <span className="text-2xl font-bold text-gray-900 leading-tight">
                     Automa<span className="text-blue-600">Flow</span>
                   </span>
-                  <span className="text-xs text-gray-500 font-medium">Business Management</span>
+                  <span className="text-xs text-gray-500 font-medium">
+                    Business Management
+                  </span>
                 </div>
               </Link>
             </div>
@@ -97,7 +103,7 @@ export default function Navbar() {
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
                 </span>
               </Link>
-              
+
               <Link
                 to="/orders"
                 className="group relative flex items-center space-x-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg transition-all duration-200"
@@ -138,16 +144,24 @@ export default function Navbar() {
                     {/* <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div> */}
                   </div>
                   <div className="hidden md:block text-left">
-                    <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
-                    <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {user?.name}
+                    </p>
+                    <p className="text-xs text-gray-500 capitalize">
+                      {user?.role}
+                    </p>
                   </div>
-                  <FaChevronDown className={`text-gray-400 text-xs transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
+                  <FaChevronDown
+                    className={`text-gray-400 text-xs transition-transform duration-200 ${
+                      showDropdown ? "rotate-180" : ""
+                    }`}
+                  />
                 </button>
 
                 {showDropdown && (
                   <>
-                    <div 
-                      className="fixed inset-0 z-40" 
+                    <div
+                      className="fixed inset-0 z-40"
                       onClick={() => setShowDropdown(false)}
                     ></div>
                     <div className="absolute right-0 mt-3 w-64 bg-white shadow-xl rounded-2xl border border-gray-100 z-50 overflow-hidden">
@@ -160,8 +174,16 @@ export default function Navbar() {
                             className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
                           />
                           <div>
-                            <h4 className="font-semibold text-gray-900 text-sm">{user?.name}</h4>
-                            <p className="text-xs text-gray-600">{user?.email}</p>
+                            <h4 className="font-semibold text-gray-900 text-sm">
+                              {user?.name}
+                            </h4>
+                            <p className="text-xs text-gray-600">
+                              {user?.email
+                                ? user.email.length > 15
+                                  ? user.email.slice(0, 15) + "..."
+                                  : user.email
+                                : ""}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -182,9 +204,11 @@ export default function Navbar() {
                       {/* Quick Tools Section */}
                       <div className="px-2 pb-2">
                         <div className="px-3 py-1">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Quick Tools</p>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Quick Tools
+                          </p>
                         </div>
-                        
+
                         <Link
                           to="/invoice-generator"
                           onClick={() => setShowDropdown(false)}
@@ -195,7 +219,7 @@ export default function Navbar() {
                           </div>
                           <span>Invoice Generator</span>
                         </Link>
-                        
+
                         <Link
                           to="/invoice-scanner"
                           onClick={() => setShowDropdown(false)}
@@ -206,7 +230,7 @@ export default function Navbar() {
                           </div>
                           <span>Invoice Scanner</span>
                         </Link>
-                        
+
                         <Link
                           to="/tone-email"
                           onClick={() => setShowDropdown(false)}
@@ -231,7 +255,7 @@ export default function Navbar() {
                           </div>
                           <span>Delete Account</span>
                         </Link>
-                        
+
                         <button
                           onClick={handleSignOut}
                           className="w-full flex items-center space-x-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors"
@@ -259,67 +283,87 @@ export default function Navbar() {
         >
           <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full mx-4 border border-gray-100 overflow-hidden">
             <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900">User Profile</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                User Profile
+              </h3>
             </div>
-            
+
             <div className="p-4">
               <div className="flex items-center space-x-3 mb-4 pb-4 border-b border-gray-100">
-                <Image 
-                  src={user?.image || "/dp.jpg"} 
-                  alt="User" 
-                  className="w-12 h-12 rounded-full border-2 border-blue-100 shadow-sm" 
+                <Image
+                  src={user?.image || "/dp.jpg"}
+                  alt="User"
+                  className="w-12 h-12 rounded-full border-2 border-blue-100 shadow-sm"
                 />
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900">{user?.name}</h4>
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    {user?.name}
+                  </h4>
                   <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full font-medium capitalize">
                     {user?.role}
                   </span>
                 </div>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <div className="p-1.5 bg-gray-100 rounded-lg">
                     <FaIdCard className="text-gray-600 w-3 h-3" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">User ID</p>
-                    <p className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded">{user?._id}</p>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      User ID
+                    </p>
+                    <p className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded">
+                      {user?._id}
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <div className="p-1.5 bg-gray-100 rounded-lg">
                     <FaUser className="text-gray-600 w-3 h-3" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Name</p>
-                    <p className="text-sm text-gray-900 font-medium">{user?.name}</p>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Name
+                    </p>
+                    <p className="text-sm text-gray-900 font-medium">
+                      {user?.name}
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <div className="p-1.5 bg-gray-100 rounded-lg">
                     <FaEnvelope className="text-gray-600 w-3 h-3" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Email</p>
-                    <p className="text-sm text-gray-900 font-medium">{user?.email}</p>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Email
+                    </p>
+                    <p className="text-sm text-gray-900 font-medium">
+                      {user?.email}
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3">
                   <div className="p-1.5 bg-gray-100 rounded-lg">
                     <FaUserShield className="text-gray-600 w-3 h-3" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Role</p>
-                    <p className="text-sm text-gray-900 font-medium capitalize">{user?.role}</p>
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                      Role
+                    </p>
+                    <p className="text-sm text-gray-900 font-medium capitalize">
+                      {user?.role}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-            
+
             <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex justify-end">
               <button
                 onClick={closeProfileModal}
@@ -339,5 +383,5 @@ export default function Navbar() {
         onAccountDeleted={handleAccountDeleted}
       />
     </>
-  )
+  );
 }

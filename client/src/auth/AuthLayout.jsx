@@ -44,10 +44,18 @@ export default function AuthLayout() {
         {/* Content */}
         <div className="relative flex flex-col justify-center px-12 py-12 text-white">
           <div className="max-w-md">
-            {/* Logo/Brand */}
-            <div className="mb-8">
-              <h3 className="text-xl font-bold">YourApp</h3>
-            </div>
+           
+<div className="flex items-center justify-start">
+  <div className="bg-white p-1 rounded-xl shadow-lg">
+    <img 
+      src="/automaflow.png" 
+      alt="Automaflow Logo" 
+      className="h-24 w-auto"
+    />
+  </div>
+</div>
+
+
 
             {/* Dynamic Content */}
             <div className="space-y-6">
