@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { AlertTriangle, Activity, CheckCircle, XCircle, Eye, Brain, TrendingUp } from "lucide-react"
+import { AlertTriangle, Activity, CheckCircle, XCircle, Eye, Brain, TrendingUp, Settings } from "lucide-react"
 import { useSelector } from "react-redux"
 
 declare global {
@@ -38,6 +38,14 @@ interface Anomaly {
   severity: "high" | "medium" | "low"
   reason: string
   type: "sudden_drop" | "unexpected_increase" | "unusual_pattern"
+  changePercentage: number // Added to track actual change percentage
+}
+
+// Configuration interface for detection settings
+interface DetectionConfig {
+  minimumChangeThreshold: number // Minimum percentage change to trigger notification
+  anomalyScoreThreshold: number // Neural network confidence threshold
+  enableSmallChangeDetection: boolean // Toggle for detecting small changes
 }
 
 const InventoryAnomalyDetector = () => {
@@ -53,6 +61,14 @@ const InventoryAnomalyDetector = () => {
   const [isLoadingBrain, setIsLoadingBrain] = useState(true)
   const [brainLoadError, setBrainLoadError] = useState<string | null>(null)
   const [previousInventoryData, setPreviousInventoryData] = useState<InventoryItem[]>([])
+  const [showSettings, setShowSettings] = useState(false)
+  
+  // Detection configuration with default values
+  const [detectionConfig, setDetectionConfig] = useState<DetectionConfig>({
+    minimumChangeThreshold: 25, // 25% minimum change threshold
+    anomalyScoreThreshold: 0.3, // Neural network confidence threshold
+    enableSmallChangeDetection: false // Disable small change notifications by default
+  })
 
   const loadBrainJS = useCallback(() => {
     return new Promise<void>((resolve, reject) => {
@@ -207,7 +223,6 @@ const InventoryAnomalyDetector = () => {
           daysSinceUpdate = Math.random() * 0.3
           statusCode = 1
         } else {
-          // Stale data
           stockLevel = baseStock
           stockChangePercent = 0
           daysSinceUpdate = 0.5 + Math.random() * 0.5
@@ -311,7 +326,6 @@ const InventoryAnomalyDetector = () => {
         return true
       }
 
-      // Check for meaningful changes
       if (
         current.currentStock !== previous.currentStock ||
         current.status !== previous.status ||
@@ -337,20 +351,19 @@ const InventoryAnomalyDetector = () => {
           existing.currentStock === newAnomaly.currentStock &&
           existing.previousStock === newAnomaly.previousStock &&
           existing.type === newAnomaly.type &&
-          // Only consider it duplicate if detected within last 5 minutes
           Date.now() - existing.timestamp.getTime() < 5 * 60 * 1000,
       )
     },
     [],
   )
 
+  // Enhanced anomaly detection with configurable change threshold
   const detectAnomalies = useCallback(async () => {
     if (!neuralNetwork || !isMonitoring) return
 
     try {
       const currentData = await fetchInventoryData()
 
-      // Only proceed if data has actually changed
       if (!hasInventoryChanged(currentData, previousInventoryData)) {
         console.log("[v0] No inventory changes detected, skipping anomaly detection")
         return
@@ -366,6 +379,7 @@ const InventoryAnomalyDetector = () => {
 
         const stockChange = item.currentStock - previousStock
         const stockChangePercent = previousStock > 0 ? stockChange / previousStock : 0
+        const changePercentageAbs = Math.abs(stockChangePercent * 100) // Convert to percentage
         const daysSinceUpdate = (Date.now() - new Date(item.lastUpdated).getTime()) / (1000 * 60 * 60 * 24)
 
         const input = {
@@ -387,17 +401,30 @@ const InventoryAnomalyDetector = () => {
         const result = neuralNetwork.run(input) as { normal: number }
         const anomalyScore = 1 - result.normal
 
-        if (Math.abs(stockChangePercent) > 0.8) {
-          console.log(`[v0] Extreme stock change detected for ${item.productName}:`, {
+        // Log significant changes for debugging
+        if (changePercentageAbs > 20) {
+          console.log(`[v0] Significant change detected for ${item.productName}:`, {
             stockChange: `${previousStock} → ${item.currentStock}`,
-            stockChangePercent,
-            anomalyScore,
-            normalScore: result.normal,
-            input,
+            changePercentage: `${(stockChangePercent * 100).toFixed(1)}%`,
+            anomalyScore: anomalyScore.toFixed(3),
+            normalScore: result.normal.toFixed(3),
+            meetsThreshold: changePercentageAbs >= detectionConfig.minimumChangeThreshold,
+            meetsAnomalyScore: anomalyScore > detectionConfig.anomalyScoreThreshold
           })
         }
 
-        if (anomalyScore > 0.3) {
+        // Apply enhanced filtering logic
+        const meetsAnomalyThreshold = anomalyScore > detectionConfig.anomalyScoreThreshold
+        const meetsChangeThreshold = changePercentageAbs >= detectionConfig.minimumChangeThreshold
+        const isSignificantChange = detectionConfig.enableSmallChangeDetection || meetsChangeThreshold
+
+        // Special cases that should always be reported regardless of change threshold
+        const isCriticalAnomaly = 
+          item.status === "out-of-stock" || 
+          stockChangePercent <= -0.9 || // 90% or more decrease
+          daysSinceUpdate > 7 // Stale data
+
+        if (meetsAnomalyThreshold && (isSignificantChange || isCriticalAnomaly)) {
           let type: Anomaly["type"] = "unusual_pattern"
           let reason = "Unusual inventory pattern detected"
 
@@ -406,16 +433,15 @@ const InventoryAnomalyDetector = () => {
             reason = "Status mismatch: marked out-of-stock but has inventory"
           } else if (stockChangePercent <= -0.8) {
             type = "sudden_drop"
-            reason =
-              stockChangePercent === -1
-                ? `Complete stock depletion: ${previousStock} → ${item.currentStock}`
-                : `Severe stock decrease: ${previousStock} → ${item.currentStock}`
+            reason = stockChangePercent === -1
+              ? `Complete stock depletion: ${previousStock} → ${item.currentStock}`
+              : `Severe stock decrease: ${previousStock} → ${item.currentStock} (${(stockChangePercent * 100).toFixed(1)}%)`
           } else if (stockChangePercent < -0.3) {
             type = "sudden_drop"
-            reason = `Large stock decrease: ${previousStock} → ${item.currentStock}`
+            reason = `Large stock decrease: ${previousStock} → ${item.currentStock} (${(stockChangePercent * 100).toFixed(1)}%)`
           } else if (stockChangePercent > 1.5) {
             type = "unexpected_increase"
-            reason = `Unexpected stock increase: ${previousStock} → ${item.currentStock}`
+            reason = `Unexpected stock increase: ${previousStock} → ${item.currentStock} (${(stockChangePercent * 100).toFixed(1)}%)`
           } else if (daysSinceUpdate > 7) {
             type = "unusual_pattern"
             reason = `Inventory not updated for ${Math.floor(daysSinceUpdate)} days`
@@ -430,6 +456,7 @@ const InventoryAnomalyDetector = () => {
             severity: anomalyScore > 0.8 ? "high" : anomalyScore > 0.5 ? "medium" : ("low" as Anomaly["severity"]),
             reason,
             type,
+            changePercentage: stockChangePercent * 100, // Store as percentage
           }
 
           if (!isDuplicateAnomaly(potentialAnomaly, anomalies)) {
@@ -438,8 +465,15 @@ const InventoryAnomalyDetector = () => {
               timestamp: new Date(),
               ...potentialAnomaly,
             })
+            
+            console.log(`[v0] Anomaly added for ${item.productName} - Change: ${(stockChangePercent * 100).toFixed(1)}%, Score: ${anomalyScore.toFixed(3)}`)
           } else {
             console.log(`[v0] Skipping duplicate anomaly for ${item.productName}`)
+          }
+        } else {
+          // Log why anomaly was filtered out
+          if (meetsAnomalyThreshold && !isSignificantChange && !isCriticalAnomaly) {
+            console.log(`[v0] Filtered out anomaly for ${item.productName} - Change ${changePercentageAbs.toFixed(1)}% below threshold ${detectionConfig.minimumChangeThreshold}%`)
           }
         }
       })
@@ -447,10 +481,10 @@ const InventoryAnomalyDetector = () => {
       setPreviousInventoryData(currentData)
 
       if (newAnomalies.length > 0) {
-        setAnomalies((prev) => [...newAnomalies, ...prev].slice(0, 20))
-        console.log(`[v0] Detected ${newAnomalies.length} new anomalies`)
+        setAnomalies((prev) => [...newAnomalies, ...prev].slice(0, 50)) // Increased limit to 50
+        console.log(`[v0] Detected ${newAnomalies.length} new anomalies (filtered by ${detectionConfig.minimumChangeThreshold}% threshold)`)
       } else {
-        console.log("[v0] No new anomalies detected")
+        console.log("[v0] No new anomalies detected after filtering")
       }
     } catch (error) {
       console.error("[v0] Anomaly detection error:", error)
@@ -463,6 +497,7 @@ const InventoryAnomalyDetector = () => {
     previousInventoryData,
     isDuplicateAnomaly,
     anomalies,
+    detectionConfig, // Added dependency
   ])
 
   const toggleMonitoring = () => {
@@ -472,9 +507,7 @@ const InventoryAnomalyDetector = () => {
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (isMonitoring && neuralNetwork) {
-      // Run initial detection
       detectAnomalies()
-      // Check for changes every 5 seconds (more responsive but efficient)
       interval = setInterval(detectAnomalies, 5000)
     }
     return () => clearInterval(interval)
@@ -542,12 +575,82 @@ const InventoryAnomalyDetector = () => {
         )}
 
         <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-4">
-            <Brain className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">AI Inventory Anomaly Detection</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 mb-4">
+              <Brain className="w-8 h-8 text-blue-600" />
+              <h1 className="text-3xl font-bold text-gray-900">AI Inventory Anomaly Detection</h1>
+            </div>
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <Settings className="w-4 h-4" />
+              <span>Settings</span>
+            </button>
           </div>
-          <p className="text-gray-600 text-lg">Neural network-powered real-time monitoring of inventory patterns</p>
+          <p className="text-gray-600 text-lg">Neural network-powered real-time monitoring with configurable change thresholds</p>
         </div>
+
+        {/* Settings Panel */}
+        {showSettings && (
+          <div className="bg-white rounded-lg p-6 mb-6 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Detection Settings</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Minimum Change Threshold (%)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={detectionConfig.minimumChangeThreshold}
+                  onChange={(e) => setDetectionConfig(prev => ({
+                    ...prev,
+                    minimumChangeThreshold: Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Only notify for changes above this percentage</p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  AI Confidence Threshold
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={detectionConfig.anomalyScoreThreshold}
+                  onChange={(e) => setDetectionConfig(prev => ({
+                    ...prev,
+                    anomalyScoreThreshold: Math.max(0, Math.min(1, parseFloat(e.target.value) || 0))
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Neural network confidence required (0-1)</p>
+              </div>
+
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={detectionConfig.enableSmallChangeDetection}
+                    onChange={(e) => setDetectionConfig(prev => ({
+                      ...prev,
+                      enableSmallChangeDetection: e.target.checked
+                    }))}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Detect Small Changes</span>
+                </label>
+                <p className="text-xs text-gray-500 mt-1">Enable notifications for all changes regardless of threshold</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {brainLoadError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -569,40 +672,6 @@ const InventoryAnomalyDetector = () => {
           <div className="bg-white rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Model Status</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {isLoadingBrain ? "Loading Brain.js" : isTraining ? "Training" : neuralNetwork ? "Ready" : "Error"}
-                </p>
-              </div>
-              <Activity
-                className={`w-8 h-8 ${isLoadingBrain || isTraining ? "text-yellow-500" : neuralNetwork ? "text-green-500" : "text-red-500"}`}
-              />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Model Accuracy</p>
-                <p className="text-2xl font-bold text-gray-900">{(modelAccuracy * 100).toFixed(1)}%</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-blue-500" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Monitoring</p>
-                <p className="text-2xl font-bold text-gray-900">{isMonitoring ? "ON" : "OFF"}</p>
-              </div>
-              <div className={`w-8 h-8 rounded-full ${isMonitoring ? "bg-green-500" : "bg-gray-300"}`} />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-6 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
                 <p className="text-sm font-medium text-gray-600">Anomalies Detected</p>
                 <p className="text-2xl font-bold text-gray-900">{anomalies.length}</p>
               </div>
@@ -619,7 +688,7 @@ const InventoryAnomalyDetector = () => {
                   className={`w-3 h-3 rounded-full ${isMonitoring ? "bg-green-500 animate-pulse" : "bg-gray-400"}`}
                 />
                 <span className="font-medium text-gray-700">
-                  {isMonitoring ? "Monitoring Active - Change Detection" : "Monitoring Inactive"}
+                  {isMonitoring ? `Monitoring Active - ${detectionConfig.minimumChangeThreshold}% Threshold` : "Monitoring Inactive"}
                 </span>
               </div>
 
@@ -669,17 +738,29 @@ const InventoryAnomalyDetector = () => {
 
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">Detected Anomalies ({anomalies.length})</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900">Detected Anomalies ({anomalies.length})</h2>
+              <div className="text-sm text-gray-500">
+                Showing changes ≥ {detectionConfig.minimumChangeThreshold}%
+              </div>
+            </div>
           </div>
 
           <div className="divide-y divide-gray-200">
             {anomalies.length === 0 ? (
               <div className="px-6 py-12 text-center">
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Anomalies Detected</h3>
-                <p className="text-gray-600">Your inventory patterns are normal.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Significant Anomalies Detected</h3>
+                <p className="text-gray-600">
+                  No inventory changes above {detectionConfig.minimumChangeThreshold}% threshold detected.
+                </p>
                 {!isMonitoring && (
                   <p className="text-sm text-gray-500 mt-2">Start monitoring to detect real-time anomalies.</p>
+                )}
+                {!detectionConfig.enableSmallChangeDetection && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Enable "Detect Small Changes" in settings to see all changes.
+                  </p>
                 )}
               </div>
             ) : (
@@ -697,6 +778,9 @@ const InventoryAnomalyDetector = () => {
                           >
                             {getSeverityIcon(anomaly.severity)}
                             <span className="ml-1">{anomaly.severity.toUpperCase()}</span>
+                          </span>
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                            {Math.abs(anomaly.changePercentage).toFixed(1)}% Change
                           </span>
                         </div>
 
@@ -718,7 +802,7 @@ const InventoryAnomalyDetector = () => {
                             </span>
                           </span>
                           <span>Category: {anomaly.category}</span>
-                          <span>Confidence: {(anomaly.anomalyScore * 100).toFixed(1)}%</span>
+                          <span>AI Confidence: {(anomaly.anomalyScore * 100).toFixed(1)}%</span>
                         </div>
                       </div>
                     </div>
